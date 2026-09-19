@@ -1,0 +1,15 @@
+// Pure-Java curve math. No Minecraft dependency, so the whole suite runs in plain JUnit.
+dependencies {
+    testImplementation platform("org.junit:junit-bom:5.10.2")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+tasks.named("test", Test) {
+    useJUnitPlatform()
+    testLogging { events "failed"; exceptionFormat "full" }
+}
+
+tasks.named("test", Test) {
+    testLogging { showStandardStreams = true }
+}

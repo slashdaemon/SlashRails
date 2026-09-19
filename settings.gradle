@@ -1,0 +1,30 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        maven {
+            name = 'NeoForged'
+            url = 'https://maven.neoforged.net/releases'
+        }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.10.0'
+}
+
+rootProject.name = 'slashtracks'
+
+// Pure-Java curve math (no Minecraft), unit-tested. Bands compile its sources in directly.
+include 'core'
+
+// Source-only trees (not Gradle projects), absorbed by each band via srcDirs:
+//   common-mc/       shared MC code, Mojang names   (src/main + src/client)
+//   loader-fabric/   Fabric bridge                   (src/main + src/client)
+//   loader-neoforge/ NeoForge bridge                 (src/main)
+include 'versions:1.21.1-fabric'    // Band C: MC 1.21–1.21.1
+include 'versions:1.21.1-neoforge'  // Band C NeoForge: NF 21.1.x

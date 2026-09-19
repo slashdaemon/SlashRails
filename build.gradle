@@ -1,0 +1,62 @@
+plugins {
+    id "java"
+    id "fabric-loom" version "1.13.6" apply false
+    id "net.neoforged.moddev" version "2.0.124" apply false
+}
+
+allprojects {
+    group = project.maven_group
+    version = project.mod_version
+
+    repositories {
+        mavenCentral()
+        maven { url "https://maven.fabricmc.net/" }
+        maven {
+            name = "NeoForged"
+            url = "https://maven.neoforged.net/releases"
+        }
+        maven {
+            name = "ParchmentMC"
+            url = "https://maven.parchmentmc.org"
+        }
+    }
+}
+
+subprojects {
+    apply plugin: "java"
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.encoding = "UTF-8"
+        it.options.release = 21
+    }
+}
+
+// Every band's shipping jar is copied to build/release/ so there is one place to look.
+def releaseDir = layout.buildDirectory.dir("release").get().asFile
+
+project(":versions:1.21.1-fabric") {
+    tasks.matching { it.name == "remapJar" }.configureEach { t ->
+        t.doLast {
+            releaseDir.mkdirs()
+            def jar = t.archiveFile.get().asFile
+            java.nio.file.Files.copy(jar.toPath(), new File(releaseDir, jar.name).toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        }
+    }
+}
+project(":versions:1.21.1-neoforge") {
+    tasks.matching { it.name == "jar" }.configureEach { t ->
+        t.doLast {
+            releaseDir.mkdirs()
+            def jar = t.archiveFile.get().asFile
+            java.nio.file.Files.copy(jar.toPath(), new File(releaseDir, jar.name).toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        }
+    }
+}
+
+tasks.register("buildAll") {
+    group = "build"
+    description = "Runs core tests and builds every band; jars land in build/release/."
+    dependsOn ":core:test", ":versions:1.21.1-fabric:build", ":versions:1.21.1-neoforge:build"
+}

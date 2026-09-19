@@ -1,0 +1,43 @@
+plugins {
+    id "net.neoforged.moddev"
+}
+
+version = ""
+
+base {
+    archivesName = "${rootProject.archives_base_name}-${rootProject.mod_version}+mc${project.minecraft_version}-neoforge"
+}
+
+neoForge {
+    version = project.neoforge_version
+    parchment {
+        minecraftVersion = project.parchment_minecraft_version
+        mappingsVersion = project.parchment_mappings_version
+    }
+    runs {
+        client { client() }
+        server { server() }
+    }
+    mods {
+        slashtracks {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+// NeoForge has no Loom-style client split: client sources join main and are kept off
+// dedicated servers by the mixin "client" array and Dist.CLIENT-only entrypoints.
+def root = rootProject.projectDir
+sourceSets.main.java.srcDirs += ["${root}/core/src/main/java", "${root}/common-mc/src/main/java",
+        "${root}/common-mc/src/client/java", "${root}/loader-neoforge/src/main/java"]
+sourceSets.main.resources.srcDirs += ["${root}/common-mc/src/main/resources", "${root}/common-mc/src/client/resources",
+        "${root}/loader-neoforge/src/main/resources"]
+
+processResources {
+    inputs.property "version", rootProject.mod_version
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand "version": rootProject.mod_version,
+                "neoforge_version": project.neoforge_version,
+                "minecraft_version": project.minecraft_version
+    }
+}
