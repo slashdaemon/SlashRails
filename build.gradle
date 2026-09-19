@@ -93,7 +93,8 @@ tasks.register("buildAll") {
         def libDirs = bands.collect { project(":versions:${it}").layout.buildDirectory.dir("libs").get().asFile } +
                 nestedBands.collectMany { mc -> ["band-fabric", "band-neoforge"].collect { file("versions/${mc}/${it}/build/libs") } }
         libDirs.each { dir ->
-            dir.listFiles()?.findAll { it.name.endsWith(".jar") && !it.name.contains("-dev") && !it.name.contains("-sources") }?.each { jar ->
+            def prefix = "${project.archives_base_name}-${project.mod_version}+"
+            dir.listFiles()?.findAll { it.name.startsWith(prefix) && it.name.endsWith(".jar") && !it.name.contains("-dev") && !it.name.contains("-sources") }?.each { jar ->
                 java.nio.file.Files.copy(jar.toPath(), new File(releaseDir, jar.name).toPath(),
                         java.nio.file.StandardCopyOption.REPLACE_EXISTING)
             }
