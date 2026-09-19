@@ -9,17 +9,17 @@
 
 ext.railsRenameSets = [
         // MC 1.21.2: Registry#get(id) returns Optional<Holder>; getValue(id) is the old lookup.
-        "getvalue": [
+        "getvalue" : [
                 (/BuiltInRegistries\.(\w+)\.get\(/): 'BuiltInRegistries.$1.getValue(',
         ],
         // MC 1.21.9: startRiding(entity, force) gained a third "send event" parameter.
-        "ride3"   : [
+        "ride3"    : [
                 (/startRiding\((\w+), true\)/): 'startRiding($1, true, true)',
         ],
         // MC 1.21.11: ResourceLocation -> Identifier; minecarts move to vehicle.minecart;
         // RenderType moves to rendertype and its factories to RenderTypes; Camera#getPosition is now
         // position(); AbstractMinecart#activateMinecart takes the level.
-        "mc1211"  : [
+        "mc1211"   : [
                 (/\bResourceLocation\b/)                                                                                              : 'Identifier',
                 (/net\.minecraft\.world\.entity\.vehicle\.(AbstractMinecart|Minecart|MinecartHopper|MinecartBehavior|OldMinecartBehavior)\b/): 'net.minecraft.world.entity.vehicle.minecart.$1',
                 (/net\/minecraft\/world\/entity\/vehicle\/(AbstractMinecart|Minecart|MinecartHopper|MinecartBehavior|OldMinecartBehavior)\b/): 'net/minecraft/world/entity/vehicle/minecart/$1',
@@ -27,5 +27,37 @@ ext.railsRenameSets = [
                 (/\bRenderType\.lines\(\)/)                                                                                             : 'net.minecraft.client.renderer.rendertype.RenderTypes.lines()',
                 (/\.getMainCamera\(\)\.getPosition\(\)/)                                                                                : '.getMainCamera().position()',
                 (/\.activateMinecart\(nowPos/)                                                                                          : '.activateMinecart(level, nowPos',
+        ],
+        // MC 26.1: Player#displayClientMessage(msg, overlay=true) -> sendOverlayMessage(msg); block-model
+        // types move to client.renderer.block(.dispatch); particle sprites become materials.
+        "mc261"    : [
+                (/displayClientMessage\((.+), true\)/)                                : 'sendOverlayMessage($1)',
+                (/net\.minecraft\.world\.level\.BlockAndTintGetter\b/)                 : 'net.minecraft.client.renderer.block.BlockAndTintGetter',
+                (/net\.minecraft\.client\.renderer\.block\.model\.BlockStateModel\b/) : 'net.minecraft.client.renderer.block.dispatch.BlockStateModel',
+                (/\.particleIcon\(\)/)                                                 : '.particleMaterial().sprite()',
+        ],
+        // Fabric API 26.1: Mojang-name renames (item groups -> creative tabs, S2C -> clientbound,
+        // world -> level) and the renderer API moves under client.
+        "fabric261": [
+                (/net\.fabricmc\.fabric\.api\.itemgroup\.v1\.ItemGroupEvents/): 'net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents',
+                (/\bItemGroupEvents\.modifyEntriesEvent\(/)                   : 'CreativeModeTabEvents.modifyOutputEvent(',
+                (/PayloadTypeRegistry\.playS2C\(\)/)                          : 'PayloadTypeRegistry.clientboundPlay()',
+                (/\bServerEntityWorldChangeEvents\b/)                          : 'ServerEntityLevelChangeEvents',
+                (/\bAFTER_PLAYER_CHANGE_WORLD\b/)                              : 'AFTER_PLAYER_CHANGE_LEVEL',
+                (/net\.fabricmc\.fabric\.api\.renderer\.v1\./)                : 'net.fabricmc.fabric.api.client.renderer.v1.',
+        ],
+        // MC 26.2: entity-type constants move to EntityTypes; the main render target and the open
+        // screen move to the game renderer and the GUI.
+        "mc262"    : [
+                (/\bEntityType\.(HOPPER_MINECART|MINECART)\b/)   : 'net.minecraft.world.entity.EntityTypes.$1',
+                (/\.getMainRenderTarget\(\)/)                     : '.gameRenderer.mainRenderTarget()',
+                (/\bmc\.screen\b/)                                : 'mc.gui.screen()',
+                (/\bmc\.setScreen\(/)                             : 'mc.gui.setScreen(',
+                (/\b(\w+)\.options\.hideGui = true;/)             : 'if (!$1.gui.hud.isHidden()) $1.gui.hud.toggle();',
+                (/\b(\w+)\.options\.hideGui = false;/)            : 'if ($1.gui.hud.isHidden()) $1.gui.hud.toggle();',
+        ],
+        // NeoForge 26.3: the quad baker derives shading from the face direction; setShade is gone.
+        "nf263"    : [
+                (/\bb\.setShade\(true\);/): '',
         ],
 ]

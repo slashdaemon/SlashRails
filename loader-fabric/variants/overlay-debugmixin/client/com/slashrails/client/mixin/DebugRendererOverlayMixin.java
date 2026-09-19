@@ -1,7 +1,7 @@
 package com.slashrails.client.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.slashrails.client.render.CurveOverlay;
+import com.slashrails.client.render.CurveLines;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -23,7 +23,7 @@ public abstract class DebugRendererOverlayMixin {
     private void slashrails$overlay(PoseStack poseStack, Frustum frustum, MultiBufferSource.BufferSource buffers,
                                    double camX, double camY, double camZ, boolean translucent, CallbackInfo ci) {
         if (translucent) return;
-        CurveOverlay.render(poseStack, buffers, new Vec3(camX, camY, camZ));
+        CurveLines.render(poseStack, buffers, new Vec3(camX, camY, camZ));
         buffers.endBatch(RenderType.lines());
     }
 }

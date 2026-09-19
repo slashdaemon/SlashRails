@@ -51,9 +51,29 @@ def bands = [
         "1.21.11-neoforge",
 ]
 
+// MC 26.x bands are nested builds (versions/26.x/) with their own Gradle 9 wrapper and Loom: Loom
+// 1.15+ cannot share a plugin classpath with this build's Loom 1.13. They need a JDK 25; set
+// JAVA25_HOME, or leave it to Prism's bundled runtime or the foojay toolchain resolver.
+def isWindows = System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("windows")
+def jdk25 = System.getenv("JAVA25_HOME") ?: "${System.getProperty('user.home')}/AppData/Roaming/PrismLauncher/java/java-runtime-epsilon"
+def nestedBands = ["26.1.2", "26.2", "26.3"]
+nestedBands.each { mc ->
+    tasks.register("build" + mc.replace(".", ""), Exec) {
+        group = "build"
+        description = "Builds MC ${mc} (both loaders) through its nested build."
+        workingDir = file("versions/${mc}")
+        def wrapper = file("versions/${mc}/${isWindows ? 'gradlew.bat' : 'gradlew'}").absolutePath
+        def args = ["build"]
+        if (new File(jdk25).isDirectory()) args += "-Porg.gradle.java.installations.paths=${jdk25}"
+        if (gradle.startParameter.offline) args += "--offline"
+        commandLine = isWindows ? ["cmd", "/c", wrapper] + args : [wrapper] + args
+    }
+}
+
 tasks.register("buildAll") {
     group = "build"
-    description = "Runs core tests and builds every band; jars land in build/release/."
+    description = "Runs core tests and builds every band, nested ones included; jars land in build/release/."
     dependsOn ":core:test"
     bands.each { dependsOn ":versions:${it}:build" }
+    nestedBands.each { dependsOn "build" + it.replace(".", "") }
 }

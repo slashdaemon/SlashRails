@@ -1,0 +1,19 @@
+pluginManagement {
+    repositories {
+        maven { name = 'Fabric'; url = 'https://maven.fabricmc.net/' }
+        maven { name = 'NeoForged'; url = 'https://maven.neoforged.net/releases' }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+// MC 26.2 (unobfuscated, JDK 25). A nested build with its own Gradle wrapper: Loom 1.15.5 cannot share
+// a plugin classpath with the parent build's Loom 1.13. The parent's buildAll runs it through its
+// build262 task. Both subprojects compile the same shared tree as every other band.
+rootProject.name = 'slashrails-26.2'
+include 'band-fabric'
+include 'band-neoforge'

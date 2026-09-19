@@ -18,7 +18,7 @@
 // differ between Minecraft versions.
 
 def rails = project.ext.rails
-def root = rootProject.projectDir
+def root = project.railsRootDir   // set by the loader composer: the repo root, also from a nested 26.x build
 def loaderName = project.ext.railsLoader
 def compat = (rails.compat ?: []).collect { new File(root, "compat/${it}") }
 def loaderVariants = (rails.loader ?: []).collect { new File(root, "loader-${loaderName}/variants/${it}") }
@@ -39,7 +39,7 @@ if (rails.devtools) clientJava += new File(root, "common-mc/src/devtools/java")
 // Shared sources are copied through a rename pass before compiling. A band lists named rename
 // sets from gradle/renames.gradle for classes and packages Mojang moved (e.g. ResourceLocation ->
 // Identifier at 1.21.11) instead of forking every file that mentions them.
-apply from: "${rootDir}/gradle/renames.gradle"
+apply from: new File(root, "gradle/renames.gradle")
 def renames = [:]
 (rails.renames ?: []).each { String set ->
     assert project.railsRenameSets.containsKey(set): "unknown rename set ${set}"
@@ -75,6 +75,6 @@ def quote = { List l -> l.collect { "\"${it}\"" }.join(", ") }
 project.ext.railsMixinExpand = [
         mixins       : quote(mixins),
         client_mixins: quote(clientMixins),
-        mixin_compat : (project.findProperty("java_version") ?: "21") == "17" ? "JAVA_17" : "JAVA_21",
+        mixin_compat : "JAVA_" + (project.findProperty("java_version") ?: "21"),
 ]
 project.ext.railsJava = (project.findProperty("java_version") ?: "21") as int

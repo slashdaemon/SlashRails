@@ -1,6 +1,6 @@
 package com.slashrails.fabric.client;
 
-import com.slashrails.client.render.CurveOverlay;
+import com.slashrails.client.render.CurveLines;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.client.Minecraft;
 
@@ -11,7 +11,7 @@ final class OverlayHook {
     }
 
     static void register() {
-        WorldRenderEvents.BEFORE_TRANSLUCENT.register(ctx -> CurveOverlay.render(ctx.matrices(), ctx.consumers(),
+        WorldRenderEvents.BEFORE_TRANSLUCENT.register(ctx -> CurveLines.render(ctx.matrices(), ctx.consumers(),
                 Minecraft.getInstance().gameRenderer.getMainCamera().position()));
     }
 }

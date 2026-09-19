@@ -93,10 +93,10 @@ public final class ClientRuns {
     private static void markDirty(SmoothRun run) {
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
-        if (level == null || mc.levelRenderer == null) return;
+        if (level == null) return;
         for (int i = 0; i < run.size(); i++) {
             BlockPos p = run.rail(i);
-            mc.levelRenderer.setSectionDirtyWithNeighbors(p.getX() >> 4, p.getY() >> 4, p.getZ() >> 4);
+            level.setSectionDirtyWithNeighbors(p.getX() >> 4, p.getY() >> 4, p.getZ() >> 4);
         }
     }
 }

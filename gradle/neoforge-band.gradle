@@ -8,12 +8,14 @@
 // servers by the mixin "client" array and Dist.CLIENT-only entrypoints.
 
 ext.railsLoader = "neoforge"
-apply from: "${rootDir}/gradle/band-sources.gradle"
+// The repo root. A nested 26.x build (versions/26.x/) passes it as -PrailsRoot / gradle.properties.
+ext.railsRootDir = project.hasProperty("railsRoot") ? rootProject.file(project.railsRoot) : rootProject.projectDir
+apply from: new File(project.railsRootDir, "gradle/band-sources.gradle")
 
 version = ""
 
 base {
-    archivesName = "${rootProject.archives_base_name}-${rootProject.mod_version}+mc${project.minecraft_version}-neoforge"
+    archivesName = "${project.archives_base_name}-${project.mod_version}+mc${project.minecraft_version}-neoforge"
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -72,7 +74,7 @@ sourceSets.main.resources.srcDirs += project.railsResources
 
 processResources {
     def props = project.railsMixinExpand + [
-            version        : rootProject.mod_version,
+            version        : project.mod_version,
             neoforge_range : project.neoforge_range,
             minecraft_range: project.minecraft_range,
     ]
@@ -83,12 +85,12 @@ processResources {
 }
 
 jar {
-    from(rootProject.file("LICENSE")) { rename { "${it}_slashrails" } }
+    from(new File(project.railsRootDir, "LICENSE")) { rename { "${it}_slashrails" } }
 }
 
 tasks.named("jar").configure { t ->
     t.doLast {
-        def releaseDir = rootProject.layout.buildDirectory.dir("release").get().asFile
+        def releaseDir = new File(project.railsRootDir, "build/release")
         releaseDir.mkdirs()
         def jar = t.archiveFile.get().asFile
         java.nio.file.Files.copy(jar.toPath(), new File(releaseDir, jar.name).toPath(),

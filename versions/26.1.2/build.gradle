@@ -1,0 +1,29 @@
+plugins {
+    id "java"
+    id "net.fabricmc.fabric-loom" version "1.15.5" apply false
+    id "net.neoforged.moddev" version "2.0.144" apply false
+}
+
+// Shared coordinates (mod_version, maven_group, archives_base_name) come from the repo's
+// gradle.properties so they are never duplicated; this build's own gradle.properties wins on overlap.
+def repoProps = new Properties()
+file("../../gradle.properties").withInputStream { repoProps.load(it) }
+
+allprojects {
+    repoProps.each { k, v -> if (!project.hasProperty(k as String)) project.ext.set(k as String, v) }
+    group = project.maven_group
+    repositories {
+        mavenCentral()
+        maven { url "https://maven.fabricmc.net/" }
+        maven { url "https://maven.neoforged.net/releases" }
+    }
+}
+
+subprojects {
+    apply plugin: "java"
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
+}
