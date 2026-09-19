@@ -34,6 +34,7 @@ subprojects {
 // Every band this composite builds. Each is versions/<name>/ = build.gradle (variant list) +
 // gradle.properties (coordinates). See CLAUDE.md "Bands" for what each covers.
 def bands = [
+        "1.20.1-fabric",
         "1.20.5-fabric",
         "1.20.6-neoforge",
         "1.21-fabric",
