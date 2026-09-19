@@ -75,7 +75,7 @@ final class SmoothRailModel extends BakedModelWrapper<BakedModel> {
             int i = underside ? 3 - k : k;
             b.vertex(q.x()[i], q.y()[i], q.z()[i])
                     .color(255, 255, 255, 255)
-                    .uv(sprite.getU(q.u()[i]), sprite.getV(q.v()[i]))
+                    .uv(RailSprites.u(sprite, q.u()[i]), RailSprites.v(sprite, q.v()[i]))
                     .uv2(0, 0)
                     .normal(0, ny, 0)
                     .endVertex();

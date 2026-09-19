@@ -77,7 +77,7 @@ final class SmoothRailModel extends DelegateBlockStateModel {
             int i = underside ? 3 - k : k;
             b.addVertex(q.x()[i], q.y()[i], q.z()[i])
                     .setColor(255, 255, 255, 255)
-                    .setUv(sprite.getU(q.u()[i]), sprite.getV(q.v()[i]))
+                    .setUv(RailSprites.u(sprite, q.u()[i]), RailSprites.v(sprite, q.v()[i]))
                     .setUv2(0, 0)
                     .setNormal(0, ny, 0);
         }

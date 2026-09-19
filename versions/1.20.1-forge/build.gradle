@@ -1,6 +1,6 @@
 plugins { id "net.neoforged.moddev.legacyforge" }
 ext.rails = [
-        compat : ["cart-legacy", "tick-redirect-legacy", "chunk-moving", "item-plain", "recipe-1201", "nbt-plain", "store-legacy", "ids-ctor", "sprite-atlasfn", "tooltip-level", "shot-plain", "perms-level", "lines-vertex", "net-bytebuf"],
+        compat : ["cart-legacy", "tick-redirect-legacy", "chunk-moving", "item-plain", "recipe-1201", "nbt-plain", "store-legacy", "ids-ctor", "sprite-atlasfn16", "tooltip-level", "shot-plain", "perms-level", "lines-vertex", "net-bytebuf"],
         loader : [],
 ]
 apply from: "${rootDir}/gradle/forge-band.gradle"

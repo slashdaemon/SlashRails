@@ -1,6 +1,7 @@
 package com.slashrails.fabric.client;
 
 import com.slashrails.client.ClientRuns;
+import com.slashrails.client.render.RailSprites;
 import com.slashrails.client.render.TrackMesh;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -24,7 +25,7 @@ final class FabricQuads {
         for (int k = 0; k < 4; k++) {
             int i = underside ? 3 - k : k;
             e.pos(k, q.x()[i], q.y()[i], q.z()[i]);
-            e.uv(k, sprite.getU(q.u()[i]), sprite.getV(q.v()[i]));
+            e.uv(k, RailSprites.u(sprite, q.u()[i]), RailSprites.v(sprite, q.v()[i]));
             e.color(k, -1);
         }
         e.nominalFace(underside ? Direction.DOWN : Direction.UP);

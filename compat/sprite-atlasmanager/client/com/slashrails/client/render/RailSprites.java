@@ -15,4 +15,14 @@ public final class RailSprites {
     public static TextureAtlasSprite plainRail() {
         return Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(AtlasIds.BLOCKS).getSprite(Ids.minecraft("block/rail"));
     }
+
+    /** Atlas U for a 0..1 position across the sprite. */
+    public static float u(TextureAtlasSprite sprite, float f) {
+        return sprite.getU(f);
+    }
+
+    /** Atlas V for a 0..1 position along the sprite. */
+    public static float v(TextureAtlasSprite sprite, float f) {
+        return sprite.getV(f);
+    }
 }
