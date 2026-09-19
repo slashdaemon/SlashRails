@@ -36,6 +36,7 @@ public final class VisualTest {
 
     /** Client tick (end). */
     public static void tick(Minecraft mc) {
+        com.slashtracks.client.demo.DemoScenes.tick(mc);
         if (MP) {
             mpTick(mc);
             return;

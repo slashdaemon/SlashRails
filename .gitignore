@@ -9,3 +9,4 @@ out/
 bin/
 *.log
 run-client/
+run-demo/

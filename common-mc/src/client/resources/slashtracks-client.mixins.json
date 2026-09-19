@@ -4,7 +4,8 @@
   "package": "com.slashtracks.client.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "AbstractMinecartClientMixin"
+    "AbstractMinecartClientMixin",
+    "GameRendererDemoMixin"
   ],
   "injectors": {
     "defaultRequire": 1

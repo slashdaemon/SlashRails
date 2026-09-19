@@ -27,6 +27,15 @@ loom {
             programArgs "--quickPlayMultiplayer", "127.0.0.1:25590", "--username", "SlashTester"
             runDir "run-client"
         }
+        // Dev-only store-gallery demo takes (common-mc DemoScenes; scripts/record-demos.sh).
+        demo {
+            client()
+            name "Demo"
+            vmArg "-Dslashtracks.demo=${project.findProperty('demo') ?: 'click'}"
+            vmArg "-Dslashtracks.ffmpeg=${project.findProperty('ffmpeg') ?: 'ffmpeg'}"
+            programArgs "--quickPlaySingleplayer", "demo-world", "--width", "1920", "--height", "1080"
+            runDir "run-demo"
+        }
         visualTest {
             client()
             name "Visual Test"
