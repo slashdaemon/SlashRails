@@ -1,11 +1,13 @@
 package com.slashtracks.fabric.client;
 
 import com.slashtracks.client.ClientRuns;
+import com.slashtracks.client.VisualTest;
 import com.slashtracks.client.render.CurveOverlay;
 import com.slashtracks.net.RemoveRunPayload;
 import com.slashtracks.net.RunsPayload;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -24,6 +26,7 @@ public final class SlashTracksFabricClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(RunsPayload.TYPE, (payload, context) -> ClientRuns.handle(payload));
         ClientPlayNetworking.registerGlobalReceiver(RemoveRunPayload.TYPE, (payload, context) -> ClientRuns.handle(payload));
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ClientRuns.clear());
+        ClientTickEvents.END_CLIENT_TICK.register(VisualTest::tick);
 
         WorldRenderEvents.AFTER_TRANSLUCENT.register(ctx -> {
             if (ctx.consumers() != null) {

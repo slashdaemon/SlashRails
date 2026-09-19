@@ -14,7 +14,7 @@ PASS=$(grep '^rcon.password=' "$RUN/server.properties" | cut -d= -f2)
 export JAVA_HOME PATH="$JAVA_HOME/bin:$PATH"
 
 rm -rf "$RUN/selftest-world"
-( cd "$ROOT" && ./gradlew --offline ":versions:1.21.1-$LOADER:runServer" > "$LOG" 2>&1 ) &
+( cd "$ROOT" && ./gradlew ${OFFLINE---offline} ":versions:1.21.1-$LOADER:runServer" > "$LOG" 2>&1 ) &
 SERVER=$!
 
 for _ in $(seq 1 300); do

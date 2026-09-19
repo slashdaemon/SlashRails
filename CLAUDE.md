@@ -29,10 +29,21 @@ export JAVA_HOME="/c/Users/slash/AppData/Roaming/PrismLauncher/java/java-runtime
 scripts/selftest.sh fabric|neoforge     # boots a dev server, runs /slashtracks selftest over RCON
 ```
 
+`scripts/persist-test.sh fabric|neoforge` smooths a run, restarts the server and checks it is
+still there. `runVisualTest` (both bands) opens a real client window and saves scripted
+screenshots to `run/screenshots/slashtracks-*.png`; it needs `run/saves/visual-world` (copy a
+self-test world) and `pauseOnLostFocus:false` in `run/options.txt`.
+
+**Shared machine:** other sessions drive real keyboard/mouse into Minecraft clients (StreamCraft
+testkit). Ask before opening a client window — focus steals break their runs. The testkit also
+force-kills every `java` whose command line contains `nogui`, so the dev servers here run with
+`-Djava.awt.headless=true` (and Loom's `serverWithGui()`) instead of `nogui`.
+
 `scripts/selftest.sh` expects `versions/1.21.1-<loader>/run/server.properties` with RCON on
 (fabric 25591, neoforge 25593, password `slashtracks`; flat world, offline mode). The run dirs
-are gitignored. Run the script as a **background** task — a dev server started from a foreground
-tool call has been killed mid-test by the environment.
+are gitignored. Run the scripts as **background** tasks (a run takes a few minutes). A dev server
+that dies with exit value -1 and no crash report was killed from outside — check that nothing
+added `nogui` back to its command line.
 
 `/slashtracks selftest` rides a loaded cart over each fixture on vanilla rails and again smoothed,
 and fails on derails, not finishing, a turn-per-tick above the fixture's limit, or a detector lamp

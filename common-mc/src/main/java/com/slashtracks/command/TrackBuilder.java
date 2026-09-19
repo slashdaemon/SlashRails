@@ -22,7 +22,7 @@ final class TrackBuilder {
 
     /** What was built. {@code lamp} is next to the detector rail (null on loops). */
     record Fixture(List<RailNode> nodes, boolean closed, @Nullable BlockPos lamp, Dir startDir, int minX, int minZ,
-                   int maxX, int maxZ, int y) {
+                   int maxX, int maxZ, int y, @Nullable BlockPos rampStart) {
     }
 
     private TrackBuilder() {
@@ -32,8 +32,17 @@ final class TrackBuilder {
         return build(level, origin, steps, closed, false);
     }
 
-    /** @param trench wall in the middle third of the track on both sides (a 1-wide cutting) */
     static Fixture build(ServerLevel level, BlockPos origin, List<Dir> steps, boolean closed, boolean trench) {
+        return build(level, origin, steps, closed, trench, false);
+    }
+
+    /**
+     * @param trench wall in the middle third of the track on both sides (a 1-wide cutting)
+     * @param ramp   lead in with vanilla rails one block lower and an ascending rail up to the first
+     *               rail (the run stops at the slope, so a cart crosses from vanilla onto the curve)
+     */
+    static Fixture build(ServerLevel level, BlockPos origin, List<Dir> steps, boolean closed, boolean trench,
+                         boolean ramp) {
         List<RailNode> nodes = closed ? closedNodes(origin, steps) : openNodes(origin, steps);
         int minX = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
         for (RailNode n : nodes) {
@@ -92,7 +101,18 @@ final class TrackBuilder {
             }
         }
         Dir startDir = steps.get(0);
-        return new Fixture(nodes, closed, lamp, startDir, minX, minZ, maxX, maxZ, y);
+        BlockPos rampStart = null;
+        if (ramp && !closed && startDir == Dir.EAST) {
+            RailNode first = nodes.get(0);
+            for (int x = first.x() - 8; x <= first.x() - 1; x++) {
+                BlockPos lower = new BlockPos(x, y - 1, first.z());
+                level.setBlock(lower.below(), Blocks.SMOOTH_STONE.defaultBlockState(), flags);
+                RailShape shape = x == first.x() - 1 ? RailShape.ASCENDING_EAST : RailShape.EAST_WEST;
+                level.setBlock(lower, Blocks.RAIL.defaultBlockState().setValue(RailBlock.SHAPE, shape), flags);
+            }
+            rampStart = new BlockPos(first.x() - 7, y - 1, first.z());
+        }
+        return new Fixture(nodes, closed, lamp, startDir, minX - (ramp ? 9 : 0), minZ, maxX, maxZ, y, rampStart);
     }
 
     static void clear(ServerLevel level, int x0, int z0, int x1, int z1, int y) {

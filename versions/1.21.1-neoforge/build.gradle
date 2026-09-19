@@ -16,9 +16,17 @@ neoForge {
     }
     runs {
         client { client() }
+        // Headless instead of --nogui (no GUI either way): LocalServer's testkit force-kills every
+        // java process whose command line contains "nogui" when it switches bands.
         server {
             server()
-            programArgument "--nogui"
+            systemProperty "java.awt.headless", "true"
+        }
+        // Dev-only scripted screenshots (common-mc VisualTest): needs run/saves/visual-world.
+        visualTest {
+            client()
+            systemProperty "slashtracks.visualtest", "true"
+            programArguments.addAll("--quickPlaySingleplayer", "visual-world")
         }
     }
     mods {

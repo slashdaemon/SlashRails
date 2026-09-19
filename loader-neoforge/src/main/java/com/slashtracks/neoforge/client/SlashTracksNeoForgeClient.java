@@ -3,6 +3,7 @@ package com.slashtracks.neoforge.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.slashtracks.SlashTracks;
 import com.slashtracks.client.ClientRuns;
+import com.slashtracks.client.VisualTest;
 import com.slashtracks.client.render.CurveOverlay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,6 +18,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -30,6 +32,7 @@ public final class SlashTracksNeoForgeClient {
         modBus.addListener(ModelEvent.ModifyBakingResult.class, SlashTracksNeoForgeClient::wrapRailModels);
         NeoForge.EVENT_BUS.addListener(ClientPlayerNetworkEvent.LoggingOut.class, e -> ClientRuns.clear());
         NeoForge.EVENT_BUS.addListener(RenderLevelStageEvent.class, SlashTracksNeoForgeClient::renderOverlay);
+        NeoForge.EVENT_BUS.addListener(ClientTickEvent.Post.class, e -> VisualTest.tick(Minecraft.getInstance()));
     }
 
     /** Wrap every rail block-state model: smoothed rails draw their slice of the curve instead. */

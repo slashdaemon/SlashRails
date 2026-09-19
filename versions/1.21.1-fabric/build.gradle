@@ -12,8 +12,18 @@ loom {
     splitEnvironmentSourceSets()
 
     runs {
+        // Headless instead of --nogui (no GUI either way): LocalServer's testkit force-kills every
+        // java process whose command line contains "nogui" when it switches bands.
         server {
-            programArgs "--nogui"
+            serverWithGui() // stops Loom adding "nogui"; headless means no GUI appears anyway
+            vmArg "-Djava.awt.headless=true"
+        }
+        // Dev-only scripted screenshots (common-mc VisualTest): needs run/saves/visual-world.
+        visualTest {
+            client()
+            name "Visual Test"
+            vmArg "-Dslashtracks.visualtest=true"
+            programArgs "--quickPlaySingleplayer", "visual-world"
         }
     }
 

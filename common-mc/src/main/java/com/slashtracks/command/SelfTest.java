@@ -12,7 +12,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Minecart;
+import net.minecraft.world.entity.vehicle.MinecartHopper;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.phys.Vec3;
 
@@ -27,16 +29,21 @@ import java.util.List;
  */
 public final class SelfTest {
 
-    private record Case(String name, List<Dir> steps, boolean closed, double turnLimit, boolean trench) {
+    /**
+     * @param hopper ride an empty hopper cart instead of a ridden minecart (lighter, 0.96 friction:
+     *               it coasts to a stop, so it only has to stay on the curve, not finish)
+     */
+    private record Case(String name, List<Dir> steps, boolean closed, double turnLimit, boolean trench, boolean hopper,
+                        boolean ramp, boolean reverse) {
         Case(String name, List<Dir> steps, boolean closed, double turnLimit) {
-            this(name, steps, closed, turnLimit, false);
+            this(name, steps, closed, turnLimit, false, false, false, false);
         }
     }
 
     private enum Phase { VANILLA, SMOOTH }
 
     private static final class Ride {
-        Minecart cart;
+        AbstractMinecart cart;
         ArmorStand rider;
         Vec3 last;
         double lastHeading = Double.NaN;
@@ -81,7 +88,10 @@ public final class SelfTest {
         cases.add(new Case("90-degree corner", TestTracks.corner(), false, Double.NaN));
         // In the walled middle the cart must keep to the vanilla line: it may turn sharply there but
         // must not scrape the walls, stall or derail.
-        cases.add(new Case("staircase 1:3 in a trench", TestTracks.staircase(3, 8), false, Double.NaN, true));
+        cases.add(new Case("staircase 1:3 in a trench", TestTracks.staircase(3, 8), false, Double.NaN, true, false, false, false));
+        cases.add(new Case("hopper cart, staircase 1:2", TestTracks.staircase(2, 6), false, 5, false, true, false, false));
+        cases.add(new Case("entering from vanilla track up a ramp", TestTracks.staircase(3, 6), false, 5, false, false, true, false));
+        cases.add(new Case("staircase 1:3 ridden backwards", TestTracks.staircase(3, 6), false, 5, false, false, false, true));
     }
 
     static boolean start(CommandSourceStack source) {
@@ -92,7 +102,43 @@ public final class SelfTest {
     }
 
     public static void tick(MinecraftServer server) {
-        if (running != null) running.step();
+        if (running == null) return;
+        if (running.breakCheckTicks > 0) {
+            running.breakCheckStep();
+            return;
+        }
+        running.step();
+    }
+
+    // ---- breaking a smoothed rail reverts its run ------------------------------------------
+
+    private boolean breakChecked;
+    private int breakCheckTicks;
+    private BlockPos breakFirst;
+
+    private void startBreakCheck() {
+        fixture = TrackBuilder.build(level, origin, TestTracks.staircase(3, 4), false);
+        forceChunks(true);
+        RailNode first = fixture.nodes().get(0);
+        breakFirst = new BlockPos(first.x(), first.y(), first.z());
+        RunService.smooth(level, breakFirst);
+        RailNode mid = fixture.nodes().get(fixture.nodes().size() / 2);
+        level.destroyBlock(new BlockPos(mid.x(), mid.y(), mid.z()), false);
+        breakCheckTicks = 3; // the revert happens at the end of the next server tick
+    }
+
+    private void breakCheckStep() {
+        if (--breakCheckTicks > 0) return;
+        boolean reverted = com.slashtracks.run.SmoothRunRegistry.get(level).runAt(breakFirst) == null;
+        String line = (reverted ? "PASS" : "FAIL") + " breaking a smoothed rail reverts its run";
+        if (reverted) passed++;
+        results.add(line);
+        say(line);
+        TrackBuilder.clear(level, fixture.minX() - 3, fixture.minZ() - 3, fixture.maxX() + 3, fixture.maxZ() + 3, fixture.y());
+        forceChunks(false);
+        int total = cases.size() + 1;
+        say((passed == total ? "SELFTEST PASSED " : "SELFTEST FAILED ") + passed + "/" + total);
+        running = null;
     }
 
     // ---- state machine --------------------------------------------------------------------
@@ -104,16 +150,22 @@ public final class SelfTest {
     private void begin(Phase p) {
         phase = p;
         Case c = current();
-        fixture = TrackBuilder.build(level, origin, c.steps(), c.closed(), c.trench());
+        fixture = TrackBuilder.build(level, origin, c.steps(), c.closed(), c.trench(), c.ramp());
         if (p == Phase.VANILLA) forceChunks(true);
         if (p == Phase.SMOOTH) {
             RailNode n = fixture.nodes().get(0);
             RunService.smooth(level, new BlockPos(n.x(), n.y(), n.z()));
         }
         ride = new Ride();
-        RailNode first = fixture.nodes().get(c.closed() ? 0 : 1);
+        List<RailNode> ns = fixture.nodes();
+        RailNode first = c.reverse() ? ns.get(ns.size() - 2) : ns.get(c.closed() ? 0 : 1);
         double sx = first.x() + 0.5, sy = first.y() + 0.0625, sz = first.z() + 0.5;
-        if (p == Phase.SMOOTH) {
+        if (fixture.rampStart() != null) {
+            sx = fixture.rampStart().getX() + 0.5;
+            sy = fixture.rampStart().getY() + 0.0625;
+            sz = fixture.rampStart().getZ() + 0.5;
+        }
+        if (p == Phase.SMOOTH && fixture.rampStart() == null) {
             // Put the cart on the curve, as a cart arriving along the track would be.
             com.slashtracks.run.SmoothRun run = com.slashtracks.run.SmoothRunRegistry.get(level)
                     .runAt(new BlockPos(first.x(), first.y(), first.z()));
@@ -124,12 +176,21 @@ public final class SelfTest {
                 sz = on.z();
             }
         }
-        Minecart cart = new Minecart(level, sx, sy, sz);
+        AbstractMinecart cart = c.hopper()
+                ? new MinecartHopper(level, sx, sy, sz)
+                : new Minecart(level, sx, sy, sz);
         level.addFreshEntity(cart);
-        ArmorStand rider = new ArmorStand(level, cart.getX(), cart.getY(), cart.getZ());
-        level.addFreshEntity(rider);
-        rider.startRiding(cart, true);
+        ArmorStand rider = null;
+        if (!c.hopper()) {
+            rider = new ArmorStand(level, cart.getX(), cart.getY(), cart.getZ());
+            level.addFreshEntity(rider);
+            rider.startRiding(cart, true);
+        }
         Dir d = fixture.startDir();
+        if (c.reverse()) {
+            RailNode last = ns.get(ns.size() - 1), prev = ns.get(ns.size() - 2);
+            d = Dir.of(prev.x() - last.x(), prev.z() - last.z());
+        }
         cart.setDeltaMovement(d.dx * 0.4, 0, d.dz * 0.4);
         ride.cart = cart;
         ride.rider = rider;
@@ -138,7 +199,7 @@ public final class SelfTest {
 
     private void step() {
         Ride r = ride;
-        Minecart cart = r.cart;
+        AbstractMinecart cart = r.cart;
         r.ticks++;
         Vec3 pos = cart.position();
         double dx = pos.x - r.last.x, dz = pos.z - r.last.z;
@@ -169,8 +230,8 @@ public final class SelfTest {
         if (c.closed()) {
             if (r.travelled >= nodes.size() * 0.95) r.reached = true;
         } else {
-            RailNode last = nodes.get(nodes.size() - 1);
-            RailNode prev = nodes.get(nodes.size() - 2);
+            RailNode last = c.reverse() ? nodes.get(0) : nodes.get(nodes.size() - 1);
+            RailNode prev = c.reverse() ? nodes.get(1) : nodes.get(nodes.size() - 2);
             // Past the middle of the last rail, heading out of the track.
             double ex = last.x() + 0.5 - (prev.x() + 0.5), ez = last.z() + 0.5 - (prev.z() + 0.5);
             double along = (pos.x - (last.x() + 0.5)) * ex + (pos.z - (last.z() + 0.5)) * ez;
@@ -187,7 +248,7 @@ public final class SelfTest {
     private void finishPhase() {
         Ride r = ride;
         r.cart.discard();
-        r.rider.discard();
+        if (r.rider != null) r.rider.discard();
         Case c = current();
         if (phase == Phase.VANILLA) {
             vanillaTurn = r.maxTurn;
@@ -197,7 +258,9 @@ public final class SelfTest {
 
         boolean turnOk = Double.isNaN(c.turnLimit()) || r.maxTurn <= c.turnLimit();
         boolean lampOk = fixture.lamp() == null || r.lampLit;
-        boolean ok = r.reached && r.offRails == 0 && turnOk && lampOk && r.onCurve > 0;
+        boolean finished = r.reached || c.hopper();
+        if (c.hopper()) lampOk = true;
+        boolean ok = finished && r.offRails == 0 && turnOk && lampOk && r.onCurve > 0;
         if (ok) passed++;
         String line = String.format("%s %s: vanilla max turn %.1f deg/tick -> smoothed %.1f deg/tick%s%s; "
                         + "%s, %d ticks off rails, %d ticks on curve, %s",
@@ -217,6 +280,9 @@ public final class SelfTest {
         caseIndex++;
         if (caseIndex < cases.size()) {
             begin(Phase.VANILLA);
+        } else if (!breakChecked) {
+            breakChecked = true;
+            startBreakCheck();
         } else {
             String summary = (passed == cases.size() ? "SELFTEST PASSED " : "SELFTEST FAILED ") + passed + "/" + cases.size();
             say(summary);
