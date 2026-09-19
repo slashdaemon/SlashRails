@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 # Boots a dev dedicated server for one band, runs /slashrails selftest over RCON, prints the
 # results and stops the server. Exit code 0 only if the self-test passed.
-#   scripts/selftest.sh <band>          e.g. 1.21.2-fabric; "fabric"/"neoforge" mean the 1.21.1 bands
+#   scripts/selftest.sh <band>          e.g. 1.21.2-fabric or 26.2-neoforge; "fabric"/"neoforge" mean
+#                                       the 1.21.1 bands. 26.x bands run in their nested build on JDK 25.
 # A band without a run/ dir gets one from scripts/dev-server.properties (RCON on, flat world).
 # Don't run Gradle builds while this is running: they can kill the dev server's daemon.
 set -u
 BAND="${1:-fabric}"
 case "$BAND" in fabric|neoforge) BAND="1.21.1-$BAND" ;; esac
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-RUN="$ROOT/versions/$BAND/run"
+case "$BAND" in
+  26.*-*)  # nested build: versions/<mc>/band-<loader>
+    MC="${BAND%-*}"; LOADER="${BAND##*-}"
+    BUILD_DIR="$ROOT/versions/$MC"; TASK=":band-$LOADER:runServer"; RUN="$BUILD_DIR/band-$LOADER/run"
+    JAVA_HOME="${JAVA25_HOME:-/c/Users/slash/AppData/Roaming/PrismLauncher/java/java-runtime-epsilon}" ;;
+  *)
+    BUILD_DIR="$ROOT"; TASK=":versions:$BAND:runServer"; RUN="$ROOT/versions/$BAND/run" ;;
+esac
 LOG="$RUN/selftest-console.log"
 if [ ! -f "$RUN/server.properties" ]; then
   mkdir -p "$RUN"
@@ -21,7 +29,7 @@ PASS=$(grep '^rcon.password=' "$RUN/server.properties" | cut -d= -f2)
 export JAVA_HOME PATH="$JAVA_HOME/bin:$PATH"
 
 rm -rf "$RUN/selftest-world"
-( cd "$ROOT" && ./gradlew ${OFFLINE---offline} ":versions:$BAND:runServer" > "$LOG" 2>&1 ) &
+( cd "$BUILD_DIR" && ./gradlew ${OFFLINE---offline} "$TASK" > "$LOG" 2>&1 ) &
 SERVER=$!
 
 for _ in $(seq 1 300); do
