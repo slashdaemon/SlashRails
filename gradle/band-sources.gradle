@@ -36,11 +36,15 @@ def resources = [new File(root, "common-mc/src/main/resources"), new File(root, 
 // Dev-only tools (scripted screenshots, store-gallery demo takes) exist on the primary band only.
 if (rails.devtools) clientJava += new File(root, "common-mc/src/devtools/java")
 
-// Shared sources are copied through a rename pass before compiling. A band lists whole-word
-// renames for classes and packages Mojang moved (e.g. ResourceLocation -> Identifier at 1.21.11)
-// instead of forking every file that mentions them:
-//   renames: ["\bResourceLocation\b": "Identifier"]      (regex -> replacement)
-def renames = (rails.renames ?: [:]) as Map
+// Shared sources are copied through a rename pass before compiling. A band lists named rename
+// sets from gradle/renames.gradle for classes and packages Mojang moved (e.g. ResourceLocation ->
+// Identifier at 1.21.11) instead of forking every file that mentions them.
+apply from: "${rootDir}/gradle/renames.gradle"
+def renames = [:]
+(rails.renames ?: []).each { String set ->
+    assert project.railsRenameSets.containsKey(set): "unknown rename set ${set}"
+    renames.putAll(project.railsRenameSets[set])
+}
 def generated = { String name, List<File> dirs ->
     def out = layout.buildDirectory.dir("railsSrc/${name}")
     def task = tasks.register("railsSources" + name.capitalize(), Sync) {

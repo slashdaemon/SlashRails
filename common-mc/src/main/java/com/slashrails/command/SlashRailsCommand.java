@@ -45,7 +45,7 @@ public final class SlashRailsCommand {
                 .then(Commands.literal("smooth").executes(c -> build(c, TestTracks.corner(), false, true))));
 
         dispatcher.register(Commands.literal("slashrails")
-                .requires(src -> src.hasPermission(2))
+                .requires(com.slashrails.Perms::isGamemaster)
                 .then(testtrack)
                 .then(Commands.literal("probe")
                         .executes(c -> probe(c, 200))

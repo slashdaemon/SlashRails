@@ -28,7 +28,7 @@ public class TrackSmootherItem extends TooltipItem {
             return InteractionResult.SUCCESS;
         }
         Player player = ctx.getPlayer();
-        if (player != null && Config.opOnlyTool && !player.hasPermissions(2)) {
+        if (player != null && Config.opOnlyTool && !com.slashrails.Perms.isGamemaster(player)) {
             player.displayClientMessage(Component.translatable("slashrails.op_only"), true);
             return InteractionResult.FAIL;
         }

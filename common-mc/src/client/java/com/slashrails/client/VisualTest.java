@@ -177,7 +177,7 @@ public final class VisualTest {
                 ServerPlayer p = server.getPlayerList().getPlayer(id);
                 if (p == null) return;
                 for (String c : commands) {
-                    server.getCommands().performPrefixedCommand(p.createCommandSourceStack().withPermission(4), c);
+                    server.getCommands().performPrefixedCommand(com.slashrails.Perms.asAdmin(p.createCommandSourceStack()), c);
                 }
             });
         });

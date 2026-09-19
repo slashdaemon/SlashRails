@@ -1,0 +1,31 @@
+// Named rename sets for the shared-source rename pass (see gradle/band-sources.gradle). A band lists
+// the sets it needs, oldest first:
+//
+//   ext.rails = [..., renames: ["getvalue", "ride3"]]
+//
+// Each entry is regex -> replacement, applied line by line to every shared source file. Use them
+// only for pure renames (a class, package or method that Mojang renamed with the same meaning);
+// anything that changes behaviour or signatures belongs in a compat/ variant instead.
+
+ext.railsRenameSets = [
+        // MC 1.21.2: Registry#get(id) returns Optional<Holder>; getValue(id) is the old lookup.
+        "getvalue": [
+                (/BuiltInRegistries\.(\w+)\.get\(/): 'BuiltInRegistries.$1.getValue(',
+        ],
+        // MC 1.21.9: startRiding(entity, force) gained a third "send event" parameter.
+        "ride3"   : [
+                (/startRiding\((\w+), true\)/): 'startRiding($1, true, true)',
+        ],
+        // MC 1.21.11: ResourceLocation -> Identifier; minecarts move to vehicle.minecart;
+        // RenderType moves to rendertype and its factories to RenderTypes; Camera#getPosition is now
+        // position(); AbstractMinecart#activateMinecart takes the level.
+        "mc1211"  : [
+                (/\bResourceLocation\b/)                                                                                              : 'Identifier',
+                (/net\.minecraft\.world\.entity\.vehicle\.(AbstractMinecart|Minecart|MinecartHopper|MinecartBehavior|OldMinecartBehavior)\b/): 'net.minecraft.world.entity.vehicle.minecart.$1',
+                (/net\/minecraft\/world\/entity\/vehicle\/(AbstractMinecart|Minecart|MinecartHopper|MinecartBehavior|OldMinecartBehavior)\b/): 'net/minecraft/world/entity/vehicle/minecart/$1',
+                (/net\.minecraft\.client\.renderer\.RenderType\b/)                                                                      : 'net.minecraft.client.renderer.rendertype.RenderType',
+                (/\bRenderType\.lines\(\)/)                                                                                             : 'net.minecraft.client.renderer.rendertype.RenderTypes.lines()',
+                (/\.getMainCamera\(\)\.getPosition\(\)/)                                                                                : '.getMainCamera().position()',
+                (/\.activateMinecart\(nowPos/)                                                                                          : '.activateMinecart(level, nowPos',
+        ],
+]
