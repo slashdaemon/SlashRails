@@ -40,6 +40,15 @@ Compatibility runs: add `-Psodium=mc1.21.1-0.6.13-fabric -Piris=1.8.8+1.21.1-fab
 `-neoforge` Sodium build) to `runVisualTest`; Sodium on NeoForge needs NeoForge ≥ 21.1.115, and
 Sodium 0.8.x can't load under this Loom (1.13) in dev.
 
+**Store-gallery demo clips:** `scripts/record-demos.sh [scene…]` (scenes `click`, `ride-vanilla`,
+`ride-smooth`, `preview`; opens a 1920x1080 client window per scene), then `scripts/make-gallery.sh`
+→ `build/gallery/` (WebP + GIF ≤ 5 MiB for Modrinth's gallery limit, MP4 masters, before/after
+stills). Scenes live in `common-mc/src/client/.../demo/DemoScenes.java` and are inert unless
+`-Dslashtracks.demo` is set. Recording runs the game at 0.2× via `/tick rate` and assembles frames on
+game time, so the video plays at true speed with every frame freshly rendered. Needs the portable
+ffmpeg at `C:\Users\slash\tools\ffmpeg` (or set `FFMPEG=`). The stage world is
+`versions/1.21.1-fabric/run-demo/stage-world` (gitignored); each take starts from a copy.
+
 **Shared machine:** other sessions drive real keyboard/mouse into Minecraft clients (StreamCraft
 testkit). Ask before opening a client window — focus steals break their runs. The testkit also
 force-kills every `java` whose command line contains `nogui`, so the dev servers here run with
