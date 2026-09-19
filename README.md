@@ -50,6 +50,7 @@ makes in a single tick.
 ## Requirements and limits
 
 - Minecraft 1.21.1, Fabric (with Fabric API) or NeoForge.
+- Works with Sodium (tested 0.6.13) and Iris shaders (tested 1.8.8 on Fabric).
 - Needed on **both** the server and every client.
 - Flat track only for now: a run stops where the track goes up or down a slope.
 - A single sharp 90° corner can only be rounded a little — it stays a tight turn.

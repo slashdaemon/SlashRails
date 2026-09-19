@@ -18,6 +18,11 @@ import java.util.List;
 public final class VisualTest {
 
     private static final boolean ENABLED = Boolean.getBoolean("slashtracks.visualtest");
+    /** Multiplayer mode: join a dedicated server, log the synced run count, snapshot on changes. */
+    private static final boolean MP = Boolean.getBoolean("slashtracks.mptest");
+    private static int lastRuns = -1;
+    private static int shotIn = -1;
+    private static int shots;
 
     private record Step(int delay, Runnable action) {
     }
@@ -31,6 +36,10 @@ public final class VisualTest {
 
     /** Client tick (end). */
     public static void tick(Minecraft mc) {
+        if (MP) {
+            mpTick(mc);
+            return;
+        }
         if (!ENABLED || mc.player == null || mc.getSingleplayerServer() == null) return;
         // An unfocused window pauses singleplayer; keep the script running.
         mc.options.pauseOnLostFocus = false;
@@ -49,6 +58,25 @@ public final class VisualTest {
             SlashTracks.LOG.error("[visualtest] step {} failed", index, e);
         }
         wait = index < STEPS.size() ? STEPS.get(index).delay() : 1;
+    }
+
+    private static void mpTick(Minecraft mc) {
+        if (mc.player == null) return;
+        mc.options.pauseOnLostFocus = false;
+        mc.options.hideGui = true;
+        int runs = ClientRuns.all().size();
+        if (runs != lastRuns) {
+            StringBuilder ids = new StringBuilder();
+            for (var r : ClientRuns.all()) ids.append(' ').append(r.id()).append(':').append(r.size());
+            SlashTracks.LOG.info("[mptest] runs={} ids={}", runs, ids.toString().trim());
+            lastRuns = runs;
+            shotIn = 60;
+        }
+        if (shotIn > 0 && --shotIn == 0) {
+            String name = "slashtracks-mp-" + (shots++) + ".png";
+            Screenshot.grab(mc.gameDirectory, name, mc.getMainRenderTarget(),
+                    msg -> SlashTracks.LOG.info("[mptest] {}", msg.getString()));
+        }
     }
 
     private static void build() {

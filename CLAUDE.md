@@ -34,6 +34,12 @@ still there. `runVisualTest` (both bands) opens a real client window and saves s
 screenshots to `run/screenshots/slashtracks-*.png`; it needs `run/saves/visual-world` (copy a
 self-test world) and `pauseOnLostFocus:false` in `run/options.txt`.
 
+`scripts/mp-test.sh` (Fabric, opens a client window) joins the dev server as `SlashTester` from
+`versions/1.21.1-fabric/run-client` and checks the join snapshot, a live add and a live remove.
+Compatibility runs: add `-Psodium=mc1.21.1-0.6.13-fabric -Piris=1.8.8+1.21.1-fabric` (or the
+`-neoforge` Sodium build) to `runVisualTest`; Sodium on NeoForge needs NeoForge ≥ 21.1.115, and
+Sodium 0.8.x can't load under this Loom (1.13) in dev.
+
 **Shared machine:** other sessions drive real keyboard/mouse into Minecraft clients (StreamCraft
 testkit). Ask before opening a client window — focus steals break their runs. The testkit also
 force-kills every `java` whose command line contains `nogui`, so the dev servers here run with

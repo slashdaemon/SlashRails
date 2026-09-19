@@ -36,6 +36,21 @@ neoForge {
     }
 }
 
+repositories {
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content { includeGroup "maven.modrinth" }
+    }
+}
+
+// Compatibility testing only, never bundled: -Psodium=<version> [-Piris=<version>]
+// e.g. -Psodium=mc1.21.1-0.6.13-neoforge -Piris=1.8.8+1.21.1-neoforge
+dependencies {
+    if (project.hasProperty("sodium")) runtimeOnly "maven.modrinth:sodium:${project.sodium}"
+    if (project.hasProperty("iris")) runtimeOnly "maven.modrinth:iris:${project.iris}"
+}
+
 // NeoForge has no Loom-style client split: client sources join main and are kept off
 // dedicated servers by the mixin "client" array and Dist.CLIENT-only entrypoints.
 def root = rootProject.projectDir

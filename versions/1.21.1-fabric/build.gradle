@@ -19,6 +19,14 @@ loom {
             vmArg "-Djava.awt.headless=true"
         }
         // Dev-only scripted screenshots (common-mc VisualTest): needs run/saves/visual-world.
+        // Dev-only multiplayer sync check against the dev server (scripts/mp-test.sh).
+        mpTest {
+            client()
+            name "MP Test"
+            vmArg "-Dslashtracks.mptest=true"
+            programArgs "--quickPlayMultiplayer", "127.0.0.1:25590", "--username", "SlashTester"
+            runDir "run-client"
+        }
         visualTest {
             client()
             name "Visual Test"
@@ -35,7 +43,26 @@ loom {
     }
 }
 
+repositories {
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content { includeGroup "maven.modrinth" }
+    }
+}
+
 dependencies {
+    // Compatibility testing only, never bundled: -Psodium=<version> [-Piris=<version>]
+    // e.g. -Psodium=mc1.21.1-0.6.13-fabric -Piris=1.8.8+1.21.1-fabric
+    if (project.hasProperty("sodium")) modLocalRuntime "maven.modrinth:sodium:${project.sodium}"
+    if (project.hasProperty("iris")) {
+        modLocalRuntime "maven.modrinth:iris:${project.iris}"
+        // Iris nests these; in dev they must be on the classpath explicitly (Iris docs).
+        localRuntime "org.anarres:jcpp:1.4.14"
+        localRuntime "io.github.douira:glsl-transformer:2.0.1"
+        localRuntime "org.antlr:antlr4-runtime:4.13.1"
+    }
+
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"

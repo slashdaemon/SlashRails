@@ -40,5 +40,7 @@ jerks sideways at every step. SlashTracks turns them into real curves.
 - License: jars currently say `ARR`, matching StreamCraft. Confirm or change.
 - Item icon and mod logo are placeholders.
 - Creating a GitHub repo (`slashdaemon/SlashTracks`, private) hasn't been done.
-- Not yet checked: NeoForge client rendering, Sodium/Iris, and a real two-client multiplayer
-  session.
+- Verified: client rendering on Fabric and NeoForge; Sodium 0.6.13 (both loaders) and Iris 1.8.8
+  with a shader pack (Fabric); a client on a dedicated server receives runs on join and live adds
+  and removals. Not verified: Sodium 0.8.x, Iris on NeoForge, two clients at once, and a client
+  without the mod being turned away by a Fabric server.

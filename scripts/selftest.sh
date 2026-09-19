@@ -28,7 +28,7 @@ python "$ROOT/scripts/rcon.py" "$PORT" "$PASS" slashtracks selftest
 
 for _ in $(seq 1 600); do
   grep -qE "SELFTEST (PASSED|FAILED)" "$LOG" && break
-  if grep -qE "Exception|Crash" "$LOG" || ! kill -0 $SERVER 2>/dev/null; then break; fi
+  if grep -qE "Exception in server tick|---- Minecraft Crash Report" "$LOG" || ! kill -0 $SERVER 2>/dev/null; then break; fi
   sleep 2
 done
 grep -E "\[selftest\]|Exception|at com\.slashtracks" "$LOG"
