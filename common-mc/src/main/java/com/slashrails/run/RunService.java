@@ -112,7 +112,7 @@ public final class RunService {
     /** Join, respawn or dimension change: send the full set for the player's dimension. */
     public static void sendSnapshot(ServerPlayer player) {
         if (!Platform.get().clientHasMod(player)) return;
-        SmoothRunRegistry registry = SmoothRunRegistry.get(player.serverLevel());
+        SmoothRunRegistry registry = SmoothRunRegistry.get((net.minecraft.server.level.ServerLevel) player.level());
         Platform.get().sendToPlayer(player, new RunsPayload(true, new ArrayList<>(registry.all())));
     }
 

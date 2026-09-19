@@ -4,7 +4,6 @@ import com.slashrails.SlashRails;
 import com.slashrails.run.RunService;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Screenshot;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -262,8 +261,7 @@ public final class DemoScenes {
 
     private static void still(String name) {
         Minecraft mc = Minecraft.getInstance();
-        Screenshot.grab(mc.gameDirectory, "demo-" + name + ".png", mc.getMainRenderTarget(),
-                msg -> SlashRails.LOG.info("[demo] {}", msg.getString()));
+        com.slashrails.client.Shots.grab(mc, "demo-" + name + ".png", "demo");
     }
 
     private static double ease(double x) {

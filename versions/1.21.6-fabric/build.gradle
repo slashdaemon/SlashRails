@@ -1,6 +1,6 @@
 plugins { id "fabric-loom" }
 ext.rails = [
-        compat : ["cart-behavior", "chunk-flags", "item-setid", "recipe-1212", "nbt-optional", "store-codec", "savedtype-string", "ids-factory", "sprite-atlasfn", "tooltip-display", "shot-plain"],
+        compat : ["cart-behavior", "chunk-flags", "item-setid", "recipe-1212", "nbt-optional", "store-codec", "savedtype-string", "ids-factory", "sprite-atlasfn", "tooltip-display", "shot-scale"],
         loader : ["model-blockstate"],
         renames: [(/BuiltInRegistries\.(\w+)\.get\(/): 'BuiltInRegistries.$1.getValue('],
 ]

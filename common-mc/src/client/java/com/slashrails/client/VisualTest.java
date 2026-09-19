@@ -3,7 +3,6 @@ package com.slashrails.client;
 import com.slashrails.SlashRails;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Screenshot;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -96,8 +95,7 @@ public final class VisualTest {
         }
         if (shotIn > 0 && --shotIn == 0) {
             String name = "slashrails-mp-" + (shots++) + ".png";
-            Screenshot.grab(mc.gameDirectory, name, mc.getMainRenderTarget(),
-                    msg -> SlashRails.LOG.info("[mptest] {}", msg.getString()));
+            Shots.grab(mc, name, "mptest");
         }
     }
 
@@ -166,8 +164,7 @@ public final class VisualTest {
     private static void shot(int delay, String name) {
         step(delay, () -> {
             Minecraft mc = Minecraft.getInstance();
-            Screenshot.grab(mc.gameDirectory, "slashrails-" + name + ".png", mc.getMainRenderTarget(),
-                    msg -> SlashRails.LOG.info("[visualtest] {}", msg.getString()));
+            Shots.grab(mc, "slashrails-" + name + ".png", "visualtest");
         });
     }
 
