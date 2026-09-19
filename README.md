@@ -49,12 +49,19 @@ makes in a single tick.
 
 ## Requirements and limits
 
-- Minecraft 1.21.1, Fabric (with Fabric API) or NeoForge.
-- Works with Sodium (tested 0.6.13) and Iris shaders (tested 1.8.8 on Fabric).
+- Minecraft **1.20.1 through 26.3**:
+  - Fabric (with Fabric API) on every version.
+  - NeoForge on 1.20.6 and later.
+  - MinecraftForge 1.20.1 — the same jar also runs on NeoForge 1.20.1.
+- Works with Sodium (tested 0.6.13) and Iris shaders (tested 1.8.8 on Fabric), on 1.21.1.
 - Needed on **both** the server and every client.
 - Flat track only for now: a run stops where the track goes up or down a slope.
 - A single sharp 90° corner can only be rounded a little — it stays a tight turn.
 - Tested with ridden minecarts and hopper carts. Furnace minecarts haven't been tested on curves yet.
+- With Minecraft's experimental minecart physics turned on (1.21.2+ "Minecart Improvements"), carts
+  ride the vanilla line; the smoothed curve is still drawn.
+- On NeoForge 26.1 and later, NeoForge no longer lets rails change a passing cart's behaviour, so
+  modded rails in a smoothed run act like plain vanilla ones.
 
 ## Server config
 

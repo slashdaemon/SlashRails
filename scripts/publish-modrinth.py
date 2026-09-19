@@ -45,20 +45,47 @@ except ImportError:
 
 MODRINTH_API = "https://api.modrinth.com/v2"
 
-# Per-band Minecraft versions to advertise. Mirrors publish-curseforge.py.
-# Keyed by (mc_band, loader) because the two loaders do not cover the same MC versions:
-# NeoForge has no line below 1.20.5, and NF 21.6 / 21.7 / 21.9 have no stable builds at all
-# (every published 21.6.x / 21.9.x is a -beta), so those MC versions ride the 21.8 and 21.10 JARs.
-#
-# NOTE: 1.21.4 does NOT cover 1.21.5. SavedData.Factory was removed at 1.21.5, not 1.21.6 as
-# earlier metadata assumed — verified by compiling the CompoundTag store against 1.21.5 and
-# watching it fail. 0.1.x advertised the 1.21.4 JAR for 1.21.5; it would not have run there.
-# 1.21.5 now has its own band on both loaders.
 BAND_GAME_VERSIONS = {
-    # One band in 0.1.0. NeoForge 21.1 is 1.21.1-only; the Fabric build is only tested on 1.21.1
-    # (1.21.2 rewrote minecart movement), so neither claims a neighbouring version.
-    ("1.21.1", "fabric"):   ["1.21.1"],
-    ("1.21.1", "neoforge"): ["1.21.1"],
+    # Keyed by (band, loader): the band is the MC version a JAR is compiled against, the list is every
+    # MC version it is advertised for. Adjacent versions share a JAR only where they share the API
+    # the mod touches (see CLAUDE.md "Bands").
+    ("1.20.1",  "fabric"):   ["1.20.1"],
+    ("1.20.5",  "fabric"):   ["1.20.5", "1.20.6"],
+    ("1.21",    "fabric"):   ["1.21"],
+    ("1.21.1",  "fabric"):   ["1.21.1"],
+    ("1.21.2",  "fabric"):   ["1.21.2", "1.21.3"],
+    ("1.21.4",  "fabric"):   ["1.21.4"],
+    ("1.21.5",  "fabric"):   ["1.21.5"],
+    ("1.21.6",  "fabric"):   ["1.21.6", "1.21.7", "1.21.8"],
+    ("1.21.9",  "fabric"):   ["1.21.9", "1.21.10"],
+    ("1.21.11", "fabric"):   ["1.21.11"],
+    ("26.1.2",  "fabric"):   ["26.1.2"],
+    ("26.2",    "fabric"):   ["26.2"],
+    ("26.3",    "fabric"):   ["26.3"],
+
+    ("1.20.6",  "neoforge"): ["1.20.6"],
+    ("1.21.1",  "neoforge"): ["1.21.1"],
+    ("1.21.3",  "neoforge"): ["1.21.2", "1.21.3"],
+    ("1.21.4",  "neoforge"): ["1.21.4"],
+    ("1.21.5",  "neoforge"): ["1.21.5"],
+    ("1.21.8",  "neoforge"): ["1.21.6", "1.21.7", "1.21.8"],
+    ("1.21.10", "neoforge"): ["1.21.9", "1.21.10"],
+    ("1.21.11", "neoforge"): ["1.21.11"],
+    ("26.1.2",  "neoforge"): ["26.1.2"],
+    ("26.2",    "neoforge"): ["26.2"],
+    ("26.3",    "neoforge"): ["26.3"],
+
+    # One JAR for MinecraftForge 1.20.1 and NeoForge 1.20.1 (built against Forge 47.1.3, the API
+    # NeoForge's 1.20.1 line froze at).
+    ("1.20.1",  "forge"):    ["1.20.1"],
+}
+
+
+# Loaders each JAR is tagged with. The Forge 1.20.1 JAR also runs on NeoForge 1.20.1.
+PUBLISH_LOADERS = {
+    "fabric": ["fabric"],
+    "neoforge": ["neoforge"],
+    "forge": ["forge", "neoforge"],
 }
 
 
@@ -69,7 +96,9 @@ def game_versions_for(band: str, loader: str) -> list[str]:
 
 # (band, loader) pairs built on a beta loader. These always publish as `beta`, whatever --type says,
 # so a stable release never advertises a JAR whose loader can still break underneath it.
-BETA_ONLY_BANDS: set[tuple[str, str]] = set()
+BETA_ONLY_BANDS = {
+    ("26.3", "neoforge"),  # NeoForge 26.3 has no stable build yet (26.3.0.x-beta)
+}
 
 
 def release_type_for(band: str, loader: str, requested: str) -> str:
@@ -84,13 +113,13 @@ FABRIC_DEPENDENCIES = [
     {"project_id": "P7dR8mSH", "dependency_type": "required"},  # fabric-api
 ]
 
-LOADERS = ("fabric", "neoforge")
+LOADERS = ("fabric", "neoforge", "forge")
 
 
 def parse_filename(jar_path: Path) -> tuple[str, str, str]:
     """Parse slashrails-<ver>+mc<band>-<loader>.jar → (mod_version, mc_band, loader)."""
     name = jar_path.stem
-    m = re.match(r"^slashrails-([^+]+)\+mc([0-9.]+)-(fabric|neoforge)$", name)
+    m = re.match(r"^slashrails-([^+]+)\+mc([0-9.]+)-(fabric|neoforge|forge)$", name)
     if not m:
         raise ValueError(f"Cannot parse filename: {jar_path.name}")
     return m.group(1), m.group(2), m.group(3)
@@ -179,7 +208,8 @@ def upload_version(
 ) -> bool:
     """Returns True on successful upload, False on skip."""
     version_number = f"{mod_version}+mc{band}-{loader}"
-    name = f"v{mod_version} (MC {band} {'NeoForge' if loader == 'neoforge' else 'Fabric'})"
+    display = {"fabric": "Fabric", "neoforge": "NeoForge", "forge": "Forge + NeoForge"}[loader]
+    name = f"v{mod_version} (MC {band} {display})"
 
     print(f"\n=== {version_number} ===")
     print(f"  game_versions: {game_versions}")
@@ -198,7 +228,7 @@ def upload_version(
         "dependencies": FABRIC_DEPENDENCIES if loader == "fabric" else [],
         "game_versions": game_versions,
         "version_type": version_type,
-        "loaders": [loader],
+        "loaders": PUBLISH_LOADERS[loader],
         "featured": False,
         "project_id": project_id,
         "file_parts": [jar.name],
@@ -253,7 +283,7 @@ def main() -> int:
     p.add_argument("--release-dir", default="build/release", help="Directory containing JARs")
     p.add_argument("--changelog-file", default="CHANGELOG.md", help="Path to changelog file")
     p.add_argument("--bands", help="Comma-separated MC bands to upload (default: all discovered)")
-    p.add_argument("--loaders", help="Comma-separated loaders to upload: fabric,neoforge (default: all discovered)")
+    p.add_argument("--loaders", help="Comma-separated loaders to upload: fabric,neoforge,forge (default: all discovered)")
     p.add_argument("--dry-run", action="store_true", help="Print metadata without uploading")
     args = p.parse_args()
 
