@@ -9,13 +9,18 @@ IN="$ROOT/versions/1.21.1-fabric/run-demo/demo"
 OUT="$ROOT/build/gallery"
 mkdir -p "$OUT"
 FONT="C\:/Windows/Fonts/segoeuib.ttf"
+LIMIT=$((5 * 1024 * 1024 - 65536))  # a little under Modrinth's 5 MiB gallery limit
 
 anim() { # input.mp4 name
   "$FF" -y -loglevel error -i "$1" -vf "fps=24,scale=960:-2:flags=lanczos" \
     -c:v libwebp_anim -quality 75 -compression_level 6 -loop 0 -an "$OUT/$2.webp"
-  "$FF" -y -loglevel error -i "$1" -vf "fps=15,scale=800:-2:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=sierra2_4a" \
-    -loop 0 "$OUT/$2.gif"
-  cp "$1" "$OUT/$2.mp4"
+  # Modrinth caps gallery images at 5 MiB; step the GIF down until it fits.
+  for fw in 15:800 12:720 10:640 10:560 8:480; do
+    "$FF" -y -loglevel error -i "$1" -vf "fps=${fw%%:*},scale=${fw##*:}:-2:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=sierra2_4a" \
+      -loop 0 "$OUT/$2.gif"
+    if [ "$(stat -c %s "$OUT/$2.gif")" -le "$LIMIT" ]; then echo "  $2.gif: ${fw%%:*} fps, ${fw##*:} px"; break; fi
+  done
+  [ "$1" -ef "$OUT/$2.mp4" ] || cp "$1" "$OUT/$2.mp4"
 }
 
 [ -f "$IN/click.mp4" ] && anim "$IN/click.mp4" click
@@ -34,3 +39,7 @@ drawtext=text='SlashTracks':x=1440-text_w/2:$label" \
 fi
 cp "$IN"/../screenshots/demo-*.png "$OUT/" 2>/dev/null || true
 ls -la "$OUT"
+for f in "$OUT"/*.gif "$OUT"/*.webp; do
+  [ "$(stat -c %s "$f")" -gt "$LIMIT" ] && echo "OVER GALLERY LIMIT: $f"
+done
+exit 0

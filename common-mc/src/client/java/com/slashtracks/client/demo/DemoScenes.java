@@ -35,6 +35,12 @@ public final class DemoScenes {
     private static final String SCENE = System.getProperty("slashtracks.demo", "");
     private static final Path FFMPEG = Path.of(System.getProperty("slashtracks.ffmpeg", "ffmpeg"));
     private static final int FPS = Integer.getInteger("slashtracks.demo.fps", 60);
+    /**
+     * Game speed while recording. Capturing 1080p frames is slower than real time, so the whole game
+     * (server and client ticks, cart physics, animations) runs at this fraction via {@code /tick rate}
+     * and the video is assembled on game time — it plays back at true speed with no repeated frames.
+     */
+    private static final double SPEED = 0.2;
 
     /** The fixture: a 1:3 staircase starting at (10, -60, 10) heading east. */
     private static final BlockPos TRACK_ORIGIN = new BlockPos(7, -60, 10);
@@ -110,12 +116,13 @@ public final class DemoScenes {
     /** End of each rendered frame: capture, fire due events, finish the take. */
     public static void afterFrame(Minecraft mc) {
         if (recorder == null) return;
-        recorder.onFrame();
         double t = elapsed();
+        recorder.onFrame(t);
         while (nextEvent < EVENTS.size() && EVENTS.get(nextEvent).at() <= t) {
             EVENTS.get(nextEvent++).action().run();
         }
         if (t >= duration) {
+            runCommands("tick rate 20");
             recorder.stop();
             recorder = null;
             done = true;
@@ -124,11 +131,15 @@ public final class DemoScenes {
         }
     }
 
+    /** Scene time: seconds of game time since the take started. */
     private static double elapsed() {
-        return (System.nanoTime() - takeStart) / 1e9;
+        return (System.nanoTime() - takeStart) / 1e9 * SPEED;
     }
 
     private static void startTake(Minecraft mc) {
+        mc.gui.getChat().clearMessages(false);
+        mc.getToasts().clear();
+        mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
         try {
             nextEvent = 0;
             takeStart = System.nanoTime();
@@ -143,7 +154,8 @@ public final class DemoScenes {
     // ---- scenes ---------------------------------------------------------------------------
 
     private static void define(Minecraft mc) {
-        server("gamerule doDaylightCycle false", "gamerule doWeatherCycle false", "time set 6000", "weather clear",
+        server("gamerule sendCommandFeedback false", "gamerule logAdminCommands false",
+                "gamerule doDaylightCycle false", "gamerule doWeatherCycle false", "time set 6000", "weather clear",
                 "gamerule doMobSpawning false", "kill @e[type=!player]");
         // A clean superflat stage: clear leftovers from earlier test runs (fill is capped at 32768 blocks).
         for (int x = -24; x < 72; x += 24) {
@@ -165,6 +177,7 @@ public final class DemoScenes {
                 done = true;
             }
         }
+        server("tick rate " + (float) (20 * SPEED));
     }
 
     /** Elevated, slowly drifting view of the staircase; smoothed 2.5 s in. */
@@ -172,10 +185,9 @@ public final class DemoScenes {
         buildTrack(false);
         server("gamemode spectator");
         duration = 8.0;
-        camera = t -> {
-            double k = ease(t / duration);
-            return new double[]{27 + 5 * k, -45.5, 29.5, 180 + 4 * (k - 0.5), 38};
-        };
+        // Track spans x 10..51, z 4..10. A still, steep view ~16 blocks away: the only thing that
+        // moves is the track changing (which also keeps the gallery files small).
+        camera = t -> new double[]{30.5, -46.1, 15.0, 180, 60};
         EVENTS.add(new Event(1.9, () -> still("click-before")));
         EVENTS.add(new Event(2.5, () -> onServer(level -> RunService.smooth(level, TOOL_TARGET))));
         EVENTS.add(new Event(7.4, () -> still("click-after")));
@@ -198,11 +210,12 @@ public final class DemoScenes {
     /** Third-person over the shoulder: the tool appears, preview line, smooth, then revert. */
     private static void preview() {
         buildTrack(false);
+        // First person behind the start of the line, aiming at the second rail; hotbar and hand visible.
         server("gamemode creative", "clear @s", "item replace entity @s hotbar.1 with slashtracks:track_smoother",
-                "tp @s 12.5 -60 13.8 -137.7 19.3");
+                "tp @s 7.5 -60 10.5 -90 23");
         client(m -> {
             m.player.getInventory().selected = 0;
-            m.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+            m.options.hideGui = false;
         });
         duration = 9.0;
         camera = null;
@@ -224,10 +237,18 @@ public final class DemoScenes {
         mc.player.xRotO = 12f;
     }
 
+    /** The test fixture, dressed for the camera: plain rails on grass, no powered/detector rail or lamp. */
     private static void buildTrack(boolean smooth) {
-        String kind = "execute positioned " + TRACK_ORIGIN.getX() + " " + TRACK_ORIGIN.getY() + " " + TRACK_ORIGIN.getZ()
-                + " run slashtracks testtrack staircase 3" + (smooth ? " smooth" : "");
-        server(kind, "kill @e[type=minecart]");
+        String build = "execute positioned " + TRACK_ORIGIN.getX() + " " + TRACK_ORIGIN.getY() + " " + TRACK_ORIGIN.getZ()
+                + " run slashtracks testtrack staircase 3";
+        String area = "-4 %d -4 64 %d 24";
+        server(build, "kill @e[type=minecart]",
+                "fill " + String.format(area, -60, -60) + " rail[shape=east_west] replace powered_rail",
+                "fill " + String.format(area, -60, -60) + " rail[shape=east_west] replace detector_rail",
+                "fill " + String.format(area, -60, -60) + " air replace redstone_lamp",
+                "fill " + String.format(area, -61, -61) + " grass_block replace redstone_block",
+                "fill " + String.format(area, -61, -61) + " grass_block replace smooth_stone");
+        if (smooth) client(m -> onServer(level -> RunService.smooth(level, TOOL_TARGET)));
     }
 
     private static void useTool(boolean smooth) {

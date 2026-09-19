@@ -20,8 +20,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Dev-only: records the game's own frames into an MP4 by piping raw RGBA to ffmpeg. Frames are
- * emitted on a fixed wall-clock grid (a frame is repeated if the game renders slower), so the video
- * plays at real speed regardless of screen scaling, window position or focus.
+ * emitted on a fixed grid of scene time (a frame is repeated if the game renders slower), so the
+ * video plays at true game speed regardless of screen scaling, window position or focus. Scenes run
+ * the game in slow motion so that every output frame is a freshly rendered one.
  */
 final class DemoRecorder {
 
@@ -36,7 +37,6 @@ final class DemoRecorder {
     private final Thread writer;
     private final long start;
     private long emitted;
-    private ByteBuffer last;
     private volatile boolean closing;
     private int repeated;
 
@@ -82,9 +82,12 @@ final class DemoRecorder {
         return new DemoRecorder(w, h, fps, p);
     }
 
-    /** End of a rendered frame (render thread): emit it into every wall-clock slot that has passed. */
-    void onFrame() {
-        long due = (System.nanoTime() - start) / frameNanos + 1;
+    /**
+     * End of a rendered frame (render thread): emit it into every frame slot that scene time
+     * {@code t} (seconds of game time) has passed.
+     */
+    void onFrame(double t) {
+        long due = (long) (t * 1_000_000_000L / frameNanos) + 1;
         if (due <= emitted) return;
         RenderTarget target = Minecraft.getInstance().getMainRenderTarget();
         if (target.width != width || target.height != height) return; // resized mid-take; skip
@@ -101,7 +104,6 @@ final class DemoRecorder {
             full.add(frame);
             emitted++;
         }
-        last = b;
     }
 
     private ByteBuffer copy(ByteBuffer src) {
