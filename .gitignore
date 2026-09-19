@@ -13,3 +13,4 @@ run-client/
 run-demo/
 .env
 __pycache__/
+versions/*/*/run/
