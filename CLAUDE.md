@@ -60,19 +60,24 @@ never shadow a shared file — the source sync fails on duplicates.
 | recipe | `recipe-1201` (1.20.1–1.20.4) · `recipe-1205` (`recipes/`, result `id`) · `recipe-121` (`recipe/`) · `recipe-1212` (string ingredients) |
 | nbt / store | `nbt-plain` ≤1.21.4 · `nbt-optional` 1.21.5+; `store-legacy` 1.20.1 · `store-factory-noprov` 1.20.2–1.20.4 · `store-factory` 1.20.5–1.21.4 · `store-codec` 1.21.5+ with `savedtype-string` ≤1.21.11 / `savedtype-id` 26.1+ |
 | ids | `ids-ctor` ≤1.20.6 · `ids-factory` 1.21+ |
-| sprites | `sprite-atlasfn` ≤1.21.8 · `sprite-atlasmanager` 1.21.9+ |
+| sprites | `sprite-atlasfn16` 1.20.1 (sprite UVs in 0–16 pixels) · `sprite-atlasfn` 1.20.2–1.21.8 · `sprite-atlasmanager` 1.21.9+ — always go through `RailSprites.u/v` |
 | tooltip | `tooltip-level` ≤1.20.4 · `tooltip-context` 1.20.5–1.21.4 · `tooltip-display` 1.21.5+ |
 | lines | `lines-vertex` ≤1.20.4 · `lines-vertexpose` 1.20.5–1.20.6 · `lines-buffer` 1.21–1.21.10 · `lines-gizmo` 1.21.11+ (vanilla gizmos via a `DebugRenderer.emitGizmos` mixin, both loaders) |
 | misc | `shot-plain` ≤1.21.5 / `shot-scale` 1.21.6+; `perms-level` ≤1.21.10 / `perms-set` 1.21.11+; `net-bytebuf` 1.20.1–1.20.4 channels · `net-payload1204` NeoForge 1.20.4 (`write`/`id` payloads) · `net-payload` 1.20.5+ |
 
 Loader variants — Fabric: rail model `model-forwarding-legacy` ≤1.20.6 · `model-forwarding` 1.21–1.21.3 ·
-`model-delegate` 1.21.4 · `model-blockstate` 1.21.5+; overlay hook `overlay-events` ≤1.21.8 ·
+`model-delegate` 1.21.4 · `model-blockstate` 1.21.5+; overlay hook `overlay-events-legacy` ≤1.20.4 ·
+`overlay-events` 1.20.5–1.21.8 ·
 `overlay-debugmixin` 1.21.9–1.21.10 (Fabric API has no world render events there) · `overlay-none`
 1.21.11+ (gizmos). NeoForge: core `core-legacy` 20.4 (tick phases, `mods.toml`, payload handlers via `nfnet-payload1204`) ·
 `core-modern` 20.6+; rail hooks `cartext-minecart` ≤21.1 · `cartext-rail` 21.2–21.11 ·
 `cartext-none` 26.1+; model `model-bakedwrapper-legacy` 20.4–20.6 · `model-bakedwrapper` 21.1–21.3 ·
 `model-delegate` 21.4 · `model-blockstate` 21.5–21.11 · `model-blockstate26` 26.x; overlay
-`overlay-stage` ≤21.5 · `overlay-afterparticles` 21.6–21.10 · `overlay-none` 21.11+.
+`overlay-stage-legacy` 20.4 · `overlay-stage` 20.6–21.5 · `overlay-afterparticles` 21.6–21.10 ·
+`overlay-none` 21.11+. Before 1.20.5 the camera rotation lives in the render event's pose stack (the
+`-legacy` hooks use it); from 1.20.5 it is in the model-view matrix and the hooks pass a fresh
+`PoseStack`. NeoForge 26.2+ reads `iconFile` (`neoforge_logo_key`): the deprecated `logoFile` makes
+NeoForge show a warning screen at startup.
 
 Coordinates: `versions/*/gradle.properties`. Fabric Loader: 0.16.10 by default, 0.18.6 on the
 1.21.6+ bands (Fabric API there needs ≥0.16.13 / 0.17.0 / 0.17.3). NeoForge 21.6/21.7/21.9 have no
@@ -118,10 +123,14 @@ that never lights. `/slashrails testtrack <kind> [size] [smooth]` builds one fix
 `/slashrails probe` measures a ride you're on. The self-test covers the server side only; rendering
 (rail models, cart pose, overlay) needs a client (`runVisualTest`).
 
+`scripts/visualtest.sh <band> [world]` (**opens a client window — ask first**) copies the band's
+last self-test world into `run/saves/visual-world`, runs `runVisualTest` and quits; it saves 11
+scripted screenshots to `run/screenshots/slashrails-*.png` (vanilla vs smoothed staircase, arc,
+loop, a third-person ride, the tool preview). Check at least the smoothed top-down, the ride and the
+tool preview. Every band was checked this way for 0.2.
+
 `scripts/persist-test.sh fabric|neoforge` smooths a run, restarts the server and checks it is
-still there. `runVisualTest` (every band) opens a real client window and saves scripted
-screenshots to `run/screenshots/slashrails-*.png`; it needs `run/saves/visual-world` (copy a
-self-test world) and `pauseOnLostFocus:false` in `run/options.txt`.
+still there.
 
 `scripts/mp-test.sh` (Fabric, opens a client window) joins the dev server as `SlashTester` from
 `versions/1.21.1-fabric/run-client` and checks the join snapshot, a live add and a live remove.
