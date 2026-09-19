@@ -7,7 +7,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.PoweredRailBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.fml.loading.FMLPaths;
@@ -29,14 +28,12 @@ final class NeoForgePlatform implements Platform {
 
     @Override
     public double maxRailSpeed(AbstractMinecart cart) {
-        return cart.getMaxSpeedWithRail();
+        return NeoForgeCarts.maxRailSpeed(cart);
     }
 
     @Override
     public void onMinecartPass(BlockState rail, Level level, BlockPos pos, AbstractMinecart cart) {
-        if (cart.shouldDoRailFunctions() && rail.getBlock() instanceof BaseRailBlock block) {
-            block.onMinecartPass(rail, level, pos, cart);
-        }
+        NeoForgeCarts.onMinecartPass(rail, level, pos, cart);
     }
 
     @Override

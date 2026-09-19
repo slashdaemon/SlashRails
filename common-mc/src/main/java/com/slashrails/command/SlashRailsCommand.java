@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.entity.vehicle.Minecart;
 
 import java.util.List;
 
@@ -77,7 +76,7 @@ public final class SlashRailsCommand {
         TrackBuilder.Fixture f = TrackBuilder.build(level, origin, steps, closed);
 
         RailNode first = f.nodes().get(closed ? 0 : 1);
-        level.addFreshEntity(new Minecart(level, first.x() + 0.5, first.y() + 0.0625, first.z() + 0.5));
+        level.addFreshEntity(com.slashrails.ride.Carts.create(level, first.x() + 0.5, first.y() + 0.0625, first.z() + 0.5, false));
 
         int rails = f.nodes().size();
         if (smooth) {

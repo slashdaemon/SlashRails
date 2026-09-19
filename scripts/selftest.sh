@@ -1,20 +1,27 @@
 #!/usr/bin/env bash
 # Boots a dev dedicated server for one band, runs /slashrails selftest over RCON, prints the
 # results and stops the server. Exit code 0 only if the self-test passed.
-#   scripts/selftest.sh fabric|neoforge
-# Needs versions/1.21.1-<loader>/run/server.properties with RCON enabled (see scripts/README).
+#   scripts/selftest.sh <band>          e.g. 1.21.2-fabric; "fabric"/"neoforge" mean the 1.21.1 bands
+# A band without a run/ dir gets one from scripts/dev-server.properties (RCON on, flat world).
+# Don't run Gradle builds while this is running: they can kill the dev server's daemon.
 set -u
-LOADER="${1:-fabric}"
+BAND="${1:-fabric}"
+case "$BAND" in fabric|neoforge) BAND="1.21.1-$BAND" ;; esac
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-RUN="$ROOT/versions/1.21.1-$LOADER/run"
+RUN="$ROOT/versions/$BAND/run"
 LOG="$RUN/selftest-console.log"
+if [ ! -f "$RUN/server.properties" ]; then
+  mkdir -p "$RUN"
+  cp "$ROOT/scripts/dev-server.properties" "$RUN/server.properties"
+  echo "eula=true" > "$RUN/eula.txt"
+fi
 PORT=$(grep '^rcon.port=' "$RUN/server.properties" | cut -d= -f2)
 PASS=$(grep '^rcon.password=' "$RUN/server.properties" | cut -d= -f2)
 : "${JAVA_HOME:=/c/Users/slash/AppData/Roaming/PrismLauncher/java/java-runtime-delta}"
 export JAVA_HOME PATH="$JAVA_HOME/bin:$PATH"
 
 rm -rf "$RUN/selftest-world"
-( cd "$ROOT" && ./gradlew ${OFFLINE---offline} ":versions:1.21.1-$LOADER:runServer" > "$LOG" 2>&1 ) &
+( cd "$ROOT" && ./gradlew ${OFFLINE---offline} ":versions:$BAND:runServer" > "$LOG" 2>&1 ) &
 SERVER=$!
 
 for _ in $(seq 1 300); do

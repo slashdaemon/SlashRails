@@ -4,12 +4,9 @@ import com.slashrails.core.Dir;
 import com.slashrails.core.RailNode;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -18,12 +15,13 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Every smoothed run in one dimension. Saved with the world. */
-public final class SmoothRunRegistry extends SavedData {
+/**
+ * Every smoothed run in one dimension. Saved with the world as {@code data/slashrails_runs.dat};
+ * how it plugs into the level's saved-data storage differs per Minecraft version ({@link RunStore}).
+ */
+public final class SmoothRunRegistry extends RunStore {
 
-    private static final String NAME = "slashrails_runs";
-    private static final Factory<SmoothRunRegistry> FACTORY =
-            new Factory<>(SmoothRunRegistry::new, SmoothRunRegistry::load, null);
+    static final String NAME = "slashrails_runs";
 
     private final Map<Integer, SmoothRun> runs = new LinkedHashMap<>();
     private final Long2IntOpenHashMap byPos = new Long2IntOpenHashMap();
@@ -34,7 +32,7 @@ public final class SmoothRunRegistry extends SavedData {
     }
 
     public static SmoothRunRegistry get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(FACTORY, NAME);
+        return RunStore.get(level);
     }
 
     public boolean isEmpty() {
@@ -81,7 +79,7 @@ public final class SmoothRunRegistry extends SavedData {
     // ---- persistence ----------------------------------------------------------------------
 
     @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    CompoundTag writeTag(CompoundTag tag) {
         tag.putInt("NextId", nextId);
         ListTag list = new ListTag();
         for (SmoothRun run : runs.values()) {
@@ -91,12 +89,12 @@ public final class SmoothRunRegistry extends SavedData {
         return tag;
     }
 
-    private static SmoothRunRegistry load(CompoundTag tag, HolderLookup.Provider registries) {
+    static SmoothRunRegistry readTag(CompoundTag tag) {
         SmoothRunRegistry r = new SmoothRunRegistry();
-        r.nextId = Math.max(1, tag.getInt("NextId"));
-        ListTag list = tag.getList("Runs", Tag.TAG_COMPOUND);
+        r.nextId = Math.max(1, Nbt.getInt(tag, "NextId"));
+        ListTag list = Nbt.getCompoundList(tag, "Runs");
         for (int i = 0; i < list.size(); i++) {
-            SmoothRun run = readRun(list.getCompound(i));
+            SmoothRun run = readRun(Nbt.compoundAt(list, i));
             if (run != null) {
                 r.put(run);
                 r.nextId = Math.max(r.nextId, run.id() + 1);
@@ -124,8 +122,8 @@ public final class SmoothRunRegistry extends SavedData {
 
     @Nullable
     static SmoothRun readRun(CompoundTag t) {
-        long[] pos = t.getLongArray("Rails");
-        byte[] exits = t.getByteArray("Exits");
+        long[] pos = Nbt.getLongArray(t, "Rails");
+        byte[] exits = Nbt.getByteArray(t, "Exits");
         if (pos.length == 0 || pos.length != exits.length) return null;
         java.util.List<RailNode> nodes = new ArrayList<>(pos.length);
         boolean[] tight = new boolean[pos.length];
@@ -136,7 +134,7 @@ public final class SmoothRunRegistry extends SavedData {
             tight[i] = (exits[i] & 16) != 0;
         }
         try {
-            return new SmoothRun(t.getInt("Id"), nodes, t.getBoolean("Closed"), tight);
+            return new SmoothRun(Nbt.getInt(t, "Id"), nodes, Nbt.getBoolean(t, "Closed"), tight);
         } catch (IllegalArgumentException e) {
             return null;
         }

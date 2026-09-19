@@ -26,3 +26,8 @@ include 'core'
 // compiles them in via gradle/band-sources.gradle.
 include 'versions:1.21.1-fabric'
 include 'versions:1.21.1-neoforge'
+include 'versions:1.21-fabric'
+include 'versions:1.21.2-fabric'
+include 'versions:1.21.3-neoforge'
+include 'versions:1.21.4-fabric'
+include 'versions:1.21.4-neoforge'

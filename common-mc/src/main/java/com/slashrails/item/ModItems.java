@@ -15,7 +15,7 @@ public final class ModItems {
     }
 
     public static Item create() {
-        trackSmoother = new TrackSmootherItem(new Item.Properties().stacksTo(1));
+        trackSmoother = new TrackSmootherItem(ItemProps.of(TRACK_SMOOTHER_ID).stacksTo(1));
         return trackSmoother;
     }
 }

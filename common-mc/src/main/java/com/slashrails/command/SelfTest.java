@@ -12,8 +12,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.entity.vehicle.Minecart;
-import net.minecraft.world.entity.vehicle.MinecartHopper;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.phys.Vec3;
 
@@ -175,9 +173,7 @@ public final class SelfTest {
                 sz = on.z();
             }
         }
-        AbstractMinecart cart = c.hopper()
-                ? new MinecartHopper(level, sx, sy, sz)
-                : new Minecart(level, sx, sy, sz);
+        AbstractMinecart cart = com.slashrails.ride.Carts.create(level, sx, sy, sz, c.hopper());
         level.addFreshEntity(cart);
         ArmorStand rider = null;
         if (!c.hopper()) {

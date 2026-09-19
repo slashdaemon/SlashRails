@@ -13,7 +13,7 @@ public final class SlashRails {
     }
 
     public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+        return Ids.of(MOD_ID, path);
     }
 
     /** End of every server tick (both loaders). */
