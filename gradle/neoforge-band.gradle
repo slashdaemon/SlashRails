@@ -77,6 +77,8 @@ processResources {
             version        : project.mod_version,
             neoforge_range : project.neoforge_range,
             minecraft_range: project.minecraft_range,
+            // NeoForge 26.2+ deprecates logoFile (and shows a warning screen for it) in favour of iconFile.
+            logo_key       : project.findProperty("neoforge_logo_key") ?: "logoFile",
     ]
     inputs.properties props
     filesMatching(["META-INF/neoforge.mods.toml", "META-INF/mods.toml", "slashrails.mixins.json", "slashrails-client.mixins.json"]) {

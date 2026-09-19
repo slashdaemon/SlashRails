@@ -8,7 +8,7 @@ modId = "slashrails"
 version = "${version}"
 displayName = "SlashRails"
 authors = "Slash"
-logoFile = "assets/slashrails/icon.png"
+${logo_key} = "assets/slashrails/icon.png"
 description = '''
 Turns zigzag rail staircases into smooth curves: smooth to look at and smooth to ride in a vanilla minecart. Use the Track Smoother on a rail.
 '''
