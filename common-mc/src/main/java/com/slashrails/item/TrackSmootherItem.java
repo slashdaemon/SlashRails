@@ -10,18 +10,13 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 
-import java.util.List;
-
 /** Use on a rail to smooth the run it belongs to; use on a smoothed rail to revert it. */
-public class TrackSmootherItem extends Item {
+public class TrackSmootherItem extends TooltipItem {
 
     public TrackSmootherItem(Properties properties) {
-        super(properties);
+        super(properties, "item.slashrails.track_smoother.tooltip");
     }
 
     @Override
@@ -50,10 +45,5 @@ public class TrackSmootherItem extends Item {
         }
         if (player != null) player.displayClientMessage(msg, true);
         return InteractionResult.SUCCESS;
-    }
-
-    @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("item.slashrails.track_smoother.tooltip"));
     }
 }

@@ -1,6 +1,6 @@
 plugins { id "net.neoforged.moddev" }
 ext.rails = [
-        compat : ["cart-behavior", "chunk-moving", "item-setid", "recipe-1212", "nbt-plain", "store-factory", "ids-factory", "sprite-atlasfn"],
+        compat : ["cart-behavior", "chunk-moving", "item-setid", "recipe-1212", "nbt-plain", "store-factory", "ids-factory", "sprite-atlasfn", "tooltip-context"],
         loader : ["cartext-rail", "model-bakedwrapper"],
         renames: [(/BuiltInRegistries\.(\w+)\.get\(/): 'BuiltInRegistries.$1.getValue('],
 ]
