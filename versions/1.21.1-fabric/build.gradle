@@ -23,7 +23,7 @@ loom {
         mpTest {
             client()
             name "MP Test"
-            vmArg "-Dslashtracks.mptest=true"
+            vmArg "-Dslashrails.mptest=true"
             programArgs "--quickPlayMultiplayer", "127.0.0.1:25590", "--username", "SlashTester"
             runDir "run-client"
         }
@@ -31,21 +31,21 @@ loom {
         demo {
             client()
             name "Demo"
-            vmArg "-Dslashtracks.demo=${project.findProperty('demo') ?: 'click'}"
-            vmArg "-Dslashtracks.ffmpeg=${project.findProperty('ffmpeg') ?: 'ffmpeg'}"
+            vmArg "-Dslashrails.demo=${project.findProperty('demo') ?: 'click'}"
+            vmArg "-Dslashrails.ffmpeg=${project.findProperty('ffmpeg') ?: 'ffmpeg'}"
             programArgs "--quickPlaySingleplayer", "demo-world", "--width", "1920", "--height", "1080"
             runDir "run-demo"
         }
         visualTest {
             client()
             name "Visual Test"
-            vmArg "-Dslashtracks.visualtest=true"
+            vmArg "-Dslashrails.visualtest=true"
             programArgs "--quickPlaySingleplayer", "visual-world"
         }
     }
 
     mods {
-        slashtracks {
+        slashrails {
             sourceSet sourceSets.main
             sourceSet sourceSets.client
         }

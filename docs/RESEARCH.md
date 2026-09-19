@@ -1,6 +1,6 @@
-# SlashTracks — Research
+# SlashRails — Research
 
-SlashTracks makes a gradual curve built from vanilla rails **look** smooth and **ride** smooth in a vanilla minecart, instead of the staircase zigzag vanilla produces.
+SlashRails makes a gradual curve built from vanilla rails **look** smooth and **ride** smooth in a vanilla minecart, instead of the staircase zigzag vanilla produces.
 
 This document covers three things: vanilla mechanics, prior art, and the implementation options. Every claim is tagged with where it came from:
 
@@ -136,7 +136,7 @@ Path geometry and yaw snapping are the main culprits. Render interpolation only 
 | Create / S'n'R / IR / MTR | No | No | Yes | Yes | Varies |
 | Diagonal Perfect Rails | Yes | Yes | 45° only | No | Resource pack |
 | Minecart Improvements | Yes | Yes | No | Partial | Vanilla (experimental) |
-| **SlashTracks (target)** | **Yes** | **Yes** | **Yes** | **Yes** | **Fabric + NeoForge** |
+| **SlashRails (target)** | **Yes** | **Yes** | **Yes** | **Yes** | **Fabric + NeoForge** |
 
 ### 3.6 The gap
 
@@ -255,7 +255,7 @@ That proves both "looks smooth" and "rides smooth". Then, in order:
 
 ## 7. Licensing and naming
 
-- **Name.** No "SlashTracks" on Modrinth, and no "Smooth Tracks" on CurseForge. **Not checked:** CurseForge for "SlashTracks", and a trademark search.
+- **Name.** Renamed from SlashTracks to SlashRails. The earlier checks (no "SlashTracks" on Modrinth, no "Smooth Tracks" on CurseForge) do not cover the new name. **Not checked:** Modrinth and CurseForge for "SlashRails", and a trademark search.
   - Nearby names that could cause confusion: "Tracks" (a walking-path mod), "Track API" (Immersive Railroading's dependency), "Trackwork", "Smooth Minecarts".
 - **Code reuse.**
   - *Don't copy:* Create (custom license), Railcraft Reborn (custom license), RTM and Traincraft (All Rights Reserved).

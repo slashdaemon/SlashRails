@@ -1,6 +1,6 @@
-# CLAUDE.md — SlashTracks
+# CLAUDE.md — SlashRails
 
-SlashTracks turns zigzag vanilla rail staircases into smooth curves — smooth to look at and smooth
+SlashRails turns zigzag vanilla rail staircases into smooth curves — smooth to look at and smooth
 to ride in a **vanilla** minecart. A player uses the **Track Smoother** item on a rail; the mod
 fits a curve over that run of rails, draws the curve instead of the rail models, and moves carts
 along it. The rails stay real vanilla blocks (redstone, powered/detector/activator rails keep
@@ -12,7 +12,7 @@ working; removing the mod leaves the world intact). Design rationale and prior a
 | Path | What |
 |---|---|
 | `core/` | Pure Java 21, no Minecraft. Curve fitting (`CurveFitter`), arc-length curve (`SmoothCurve`). JUnit suite. |
-| `common-mc/src/main` | Shared MC 1.21.1 code (Mojang names): run detection, `SmoothRunRegistry` (SavedData), `CurveRide` physics, mixins, payloads, item, `/slashtracks` command, self-test. |
+| `common-mc/src/main` | Shared MC 1.21.1 code (Mojang names): run detection, `SmoothRunRegistry` (SavedData), `CurveRide` physics, mixins, payloads, item, `/slashrails` command, self-test. |
 | `common-mc/src/client` | Client: `ClientRuns` index, `TrackMesh` geometry, `CurveOverlay`, cart-render mixin. |
 | `loader-fabric/`, `loader-neoforge/` | Loader bridges (`Platform` impl, registration, events, the rail model wrapper). |
 | `versions/1.21.1-fabric/`, `versions/1.21.1-neoforge/` | The Gradle band projects. They compile the shared trees in via `srcDirs` (StreamCraft pattern) — the shared trees are not Gradle projects. |
@@ -26,12 +26,12 @@ JDK 21 (Prism `java-runtime-delta`, see `Projects/CLAUDE.md`). Dependencies are 
 export JAVA_HOME="/c/Users/slash/AppData/Roaming/PrismLauncher/java/java-runtime-delta"
 ./gradlew --offline :core:test          # curve maths (prints a smoothness table)
 ./gradlew --offline buildAll            # core tests + both bands; jars in build/release/
-scripts/selftest.sh fabric|neoforge     # boots a dev server, runs /slashtracks selftest over RCON
+scripts/selftest.sh fabric|neoforge     # boots a dev server, runs /slashrails selftest over RCON
 ```
 
 `scripts/persist-test.sh fabric|neoforge` smooths a run, restarts the server and checks it is
 still there. `runVisualTest` (both bands) opens a real client window and saves scripted
-screenshots to `run/screenshots/slashtracks-*.png`; it needs `run/saves/visual-world` (copy a
+screenshots to `run/screenshots/slashrails-*.png`; it needs `run/saves/visual-world` (copy a
 self-test world) and `pauseOnLostFocus:false` in `run/options.txt`.
 
 `scripts/mp-test.sh` (Fabric, opens a client window) joins the dev server as `SlashTester` from
@@ -44,7 +44,7 @@ Sodium 0.8.x can't load under this Loom (1.13) in dev.
 `ride-smooth`, `preview`; opens a 1920x1080 client window per scene), then `scripts/make-gallery.sh`
 → `build/gallery/` (WebP + GIF ≤ 5 MiB for Modrinth's gallery limit, MP4 masters, before/after
 stills). Scenes live in `common-mc/src/client/.../demo/DemoScenes.java` and are inert unless
-`-Dslashtracks.demo` is set. Recording runs the game at 0.2× via `/tick rate` and assembles frames on
+`-Dslashrails.demo` is set. Recording runs the game at 0.2× via `/tick rate` and assembles frames on
 game time, so the video plays at true speed with every frame freshly rendered. Needs the portable
 ffmpeg at `C:\Users\slash\tools\ffmpeg` (or set `FFMPEG=`). The stage world is
 `versions/1.21.1-fabric/run-demo/stage-world` (gitignored); each take starts from a copy.
@@ -55,15 +55,15 @@ force-kills every `java` whose command line contains `nogui`, so the dev servers
 `-Djava.awt.headless=true` (and Loom's `serverWithGui()`) instead of `nogui`.
 
 `scripts/selftest.sh` expects `versions/1.21.1-<loader>/run/server.properties` with RCON on
-(fabric 25591, neoforge 25593, password `slashtracks`; flat world, offline mode). The run dirs
+(fabric 25591, neoforge 25593, password `slashrails`; flat world, offline mode). The run dirs
 are gitignored. Run the scripts as **background** tasks (a run takes a few minutes). A dev server
 that dies with exit value -1 and no crash report was killed from outside — check that nothing
 added `nogui` back to its command line.
 
-`/slashtracks selftest` rides a loaded cart over each fixture on vanilla rails and again smoothed,
+`/slashrails selftest` rides a loaded cart over each fixture on vanilla rails and again smoothed,
 and fails on derails, not finishing, a turn-per-tick above the fixture's limit, or a detector lamp
-that never lights. `/slashtracks testtrack <kind> [size] [smooth]` builds one fixture by hand;
-`/slashtracks probe` measures a ride you're on.
+that never lights. `/slashrails testtrack <kind> [size] [smooth]` builds one fixture by hand;
+`/slashrails probe` measures a ride you're on.
 
 ## How it works (load-bearing details)
 

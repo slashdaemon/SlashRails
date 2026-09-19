@@ -26,13 +26,13 @@ halt() { rcon stop >/dev/null 2>&1; wait $SERVER; }
 
 rm -rf "$RUN/selftest-world"
 boot
-echo "before restart: $(rcon execute positioned 0 -60 0 run slashtracks testtrack arc 12 smooth)"
-BEFORE=$(rcon slashtracks list)
+echo "before restart: $(rcon execute positioned 0 -60 0 run slashrails testtrack arc 12 smooth)"
+BEFORE=$(rcon slashrails list)
 echo "before restart: $BEFORE"
 rcon save-all flush >/dev/null
 halt
 boot
-AFTER=$(rcon slashtracks list)
+AFTER=$(rcon slashrails list)
 echo "after restart:  $AFTER"
 halt
 [ "$BEFORE" = "$AFTER" ] && [[ "$AFTER" == 1\ smoothed* ]] && echo "PERSIST PASSED" || { echo "PERSIST FAILED"; exit 1; }

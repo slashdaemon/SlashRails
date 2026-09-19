@@ -14,6 +14,6 @@ First version. Minecraft 1.21.1, Fabric and NeoForge.
 - Curved track is drawn as chunk geometry with each rail's own texture.
 - Smoothed runs are saved with the world and synced to clients; breaking or re-shaping any rail
   reverts its run.
-- Operator commands: `/slashtracks testtrack`, `probe`, `selftest`, `list`.
-- Config: `config/slashtracks.properties` (max run length, operator-only tool, preview, debug
+- Operator commands: `/slashrails testtrack`, `probe`, `selftest`, `list`.
+- Config: `config/slashrails.properties` (max run length, operator-only tool, preview, debug
   overlay).

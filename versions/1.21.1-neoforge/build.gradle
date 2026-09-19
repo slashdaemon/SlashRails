@@ -25,12 +25,12 @@ neoForge {
         // Dev-only scripted screenshots (common-mc VisualTest): needs run/saves/visual-world.
         visualTest {
             client()
-            systemProperty "slashtracks.visualtest", "true"
+            systemProperty "slashrails.visualtest", "true"
             programArguments.addAll("--quickPlaySingleplayer", "visual-world")
         }
     }
     mods {
-        slashtracks {
+        slashrails {
             sourceSet sourceSets.main
         }
     }

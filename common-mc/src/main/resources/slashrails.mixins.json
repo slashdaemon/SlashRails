@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.slashrails.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "AbstractMinecartAccessor",
+    "AbstractMinecartMixin",
+    "LevelChunkMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

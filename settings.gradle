@@ -17,7 +17,7 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '0.10.0'
 }
 
-rootProject.name = 'slashtracks'
+rootProject.name = 'slashrails'
 
 // Pure-Java curve math (no Minecraft), unit-tested. Bands compile its sources in directly.
 include 'core'

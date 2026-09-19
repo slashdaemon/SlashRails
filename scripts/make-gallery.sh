@@ -33,7 +33,7 @@ if [ -f "$IN/ride-vanilla.mp4" ] && [ -f "$IN/ride-smooth.mp4" ]; then
     "[0:v]scale=960:540,setpts=PTS-STARTPTS[l];[1:v]scale=960:540,setpts=PTS-STARTPTS[r];\
 [l][r]hstack=shortest=1,pad=1920:1080:0:270:color=0x1b1f24,\
 drawtext=text='Vanilla':x=480-text_w/2:$label,\
-drawtext=text='SlashTracks':x=1440-text_w/2:$label" \
+drawtext=text='SlashRails':x=1440-text_w/2:$label" \
     -c:v libx264 -crf 16 -pix_fmt yuv420p -movflags +faststart "$OUT/ride-compare.mp4"
   anim "$OUT/ride-compare.mp4" ride-compare
 fi

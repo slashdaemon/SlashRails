@@ -1,10 +1,10 @@
-# SlashTracks
+# SlashRails
 
 Long, gentle rail curves in Minecraft come out as staircases: straight runs joined by corner
 rails. They look like a zigzag, and a minecart ride over them jerks sideways and snaps its
 heading at every step.
 
-SlashTracks turns them into real curves. Use the **Track Smoother** on a rail and the whole run
+SlashRails turns them into real curves. Use the **Track Smoother** on a rail and the whole run
 becomes one smooth curve: drawn smooth, and ridden smooth by ordinary vanilla minecarts.
 
 | Vanilla | Smoothed |
@@ -22,7 +22,7 @@ becomes one smooth curve: drawn smooth, and ridden smooth by ordinary vanilla mi
 4. Use it again on a smoothed rail to turn the run back into vanilla rails.
 
 Build the curve you want with ordinary rails first — a gentle staircase for a gentle curve.
-SlashTracks follows what you built; it doesn't invent a new route.
+SlashRails follows what you built; it doesn't invent a new route.
 
 ## What stays vanilla
 
@@ -58,7 +58,7 @@ makes in a single tick.
 
 ## Server config
 
-`config/slashtracks.properties`:
+`config/slashrails.properties`:
 
 | Key | Side | Default | Meaning |
 |---|---|---|---|
@@ -67,9 +67,9 @@ makes in a single tick.
 | `toolPreview` | client | true | Show the green preview line while holding the tool |
 | `debugOverlay` | client | false | Draw every smoothed run's centre line |
 
-Operators also get `/slashtracks list`, `/slashtracks testtrack …` and `/slashtracks selftest`.
+Operators also get `/slashrails list`, `/slashrails testtrack …` and `/slashrails selftest`.
 
 ---
 
-SlashTracks is made by The Block Academy. Not an official Minecraft product; not approved by or
+SlashRails is made by The Block Academy. Not an official Minecraft product; not approved by or
 associated with Mojang or Microsoft.

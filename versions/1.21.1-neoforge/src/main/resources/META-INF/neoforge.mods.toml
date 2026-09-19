@@ -3,30 +3,30 @@ loaderVersion = "[2,)"
 license = "ARR"
 
 [[mods]]
-modId = "slashtracks"
+modId = "slashrails"
 version = "${version}"
-displayName = "SlashTracks"
+displayName = "SlashRails"
 authors = "Slash"
-logoFile = "assets/slashtracks/icon.png"
+logoFile = "assets/slashrails/icon.png"
 description = '''
 Turns zigzag rail staircases into smooth curves: smooth to look at and smooth to ride in a vanilla minecart. Use the Track Smoother on a rail.
 '''
 displayURL = "https://theblock.academy"
 
 [[mixins]]
-config = "slashtracks.mixins.json"
+config = "slashrails.mixins.json"
 
 [[mixins]]
-config = "slashtracks-client.mixins.json"
+config = "slashrails-client.mixins.json"
 
-[[dependencies.slashtracks]]
+[[dependencies.slashrails]]
 modId = "neoforge"
 type = "required"
 versionRange = "[21.1,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.slashtracks]]
+[[dependencies.slashrails]]
 modId = "minecraft"
 type = "required"
 versionRange = "[1.21,1.21.2)"

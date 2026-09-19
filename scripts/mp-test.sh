@@ -16,14 +16,14 @@ waitfor() { # file pattern seconds
   echo "TIMEOUT waiting for: $2"; return 1
 }
 stop_client() {
-  powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='java.exe' OR Name='javaw.exe'\" | Where-Object { \$_.CommandLine -match 'slashtracks.mptest' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }" >/dev/null 2>&1
+  powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='java.exe' OR Name='javaw.exe'\" | Where-Object { \$_.CommandLine -match 'slashrails.mptest' } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force }" >/dev/null 2>&1
 }
 finish() { rcon stop >/dev/null 2>&1; stop_client; wait; exit "$1"; }
 
 rm -rf "$RUN/selftest-world"
 ( cd "$ROOT" && ./gradlew ${OFFLINE---offline} :versions:1.21.1-fabric:runServer > "$SLOG" 2>&1 ) &
 waitfor "$SLOG" "RCON running" 300 || finish 2
-echo "A: $(rcon execute positioned 0 -60 0 run slashtracks testtrack arc 12 smooth)"
+echo "A: $(rcon execute positioned 0 -60 0 run slashrails testtrack arc 12 smooth)"
 
 ( cd "$ROOT" && ./gradlew ${OFFLINE---offline} :versions:1.21.1-fabric:runMpTest > "$CLOG" 2>&1 ) &
 waitfor "$CLOG" "\[mptest\] runs=1 " 300 || finish 1
@@ -31,14 +31,14 @@ echo "join snapshot: $(grep -o '\[mptest\] runs=.*' "$CLOG" | tail -1)"
 rcon gamemode spectator SlashTester >/dev/null
 rcon tp SlashTester 14 -38 18 0 90 >/dev/null
 
-echo "B: $(rcon execute positioned 0 -60 30 run slashtracks testtrack staircase 3 smooth)"
+echo "B: $(rcon execute positioned 0 -60 30 run slashrails testtrack staircase 3 smooth)"
 waitfor "$CLOG" "\[mptest\] runs=2 " 60 || finish 1
 echo "live add: $(grep -o '\[mptest\] runs=.*' "$CLOG" | tail -1)"
-waitfor "$CLOG" "slashtracks-mp-0.png" 30
+waitfor "$CLOG" "slashrails-mp-0.png" 30
 
 rcon setblock 5 -60 30 minecraft:air >/dev/null
 waitfor "$CLOG" "\[mptest\] runs=1 ids=1:" 60 || finish 1
 echo "live remove: $(grep -o '\[mptest\] runs=.*' "$CLOG" | tail -1)"
-waitfor "$CLOG" "slashtracks-mp-1.png" 30
+waitfor "$CLOG" "slashrails-mp-1.png" 30
 echo "MP PASSED"
 finish 0

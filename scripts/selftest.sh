@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Boots a dev dedicated server for one band, runs /slashtracks selftest over RCON, prints the
+# Boots a dev dedicated server for one band, runs /slashrails selftest over RCON, prints the
 # results and stops the server. Exit code 0 only if the self-test passed.
 #   scripts/selftest.sh fabric|neoforge
 # Needs versions/1.21.1-<loader>/run/server.properties with RCON enabled (see scripts/README).
@@ -24,14 +24,14 @@ for _ in $(seq 1 300); do
   fi
   sleep 2
 done
-python "$ROOT/scripts/rcon.py" "$PORT" "$PASS" slashtracks selftest
+python "$ROOT/scripts/rcon.py" "$PORT" "$PASS" slashrails selftest
 
 for _ in $(seq 1 600); do
   grep -qE "SELFTEST (PASSED|FAILED)" "$LOG" && break
   if grep -qE "Exception in server tick|---- Minecraft Crash Report" "$LOG" || ! kill -0 $SERVER 2>/dev/null; then break; fi
   sleep 2
 done
-grep -E "\[selftest\]|Exception|at com\.slashtracks" "$LOG"
+grep -E "\[selftest\]|Exception|at com\.slashrails" "$LOG"
 python "$ROOT/scripts/rcon.py" "$PORT" "$PASS" stop >/dev/null 2>&1
 wait $SERVER
 grep -q "SELFTEST PASSED" "$LOG"
