@@ -1,0 +1,94 @@
+// Composes the MinecraftForge (LexForge) 1.20.1 band JAR from the shared tree, like the other loaders:
+//
+//   plugins { id "net.neoforged.moddev.legacyforge" }
+//   ext.rails = [compat: [...], loader: [...]]
+//   apply from: "${rootDir}/gradle/forge-band.gradle"
+//
+// Forge 1.20.1 runs SRG names in production, so the build differs from NeoForge in three ways:
+// mixins get a refmap from the Mixin annotation processor, the mixin configs are named by the JAR
+// manifest (mods.toml [[mixins]] is ignored on 1.20.1), and the shipped JAR is `reobfJar`'s output.
+// It compiles against Forge 47.1.3 so that the same JAR also loads on NeoForge 1.20.1 (47.1.x).
+
+ext.railsLoader = "forge"
+ext.railsRootDir = rootProject.projectDir
+apply from: new File(project.railsRootDir, "gradle/band-sources.gradle")
+
+version = ""
+
+base {
+    archivesName = "${project.archives_base_name}-${project.mod_version}+mc${project.minecraft_version}-forge"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = project.railsJava
+    it.options.encoding = "UTF-8"
+}
+
+legacyForge {
+    version = project.forge_version
+    runs {
+        client { client() }
+        // Headless instead of --nogui (no GUI either way): LocalServer's testkit force-kills every
+        // java process whose command line contains "nogui" when it switches bands.
+        server {
+            server()
+            systemProperty "java.awt.headless", "true"
+        }
+        visualTest {
+            client()
+            systemProperty "slashrails.visualtest", "true"
+            programArguments.addAll("--quickPlaySingleplayer", "visual-world")
+        }
+    }
+    mods {
+        slashrails {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    // Mixin annotation processor -> slashrails.refmap.json (Mojang names -> SRG for production).
+    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+}
+
+mixin {
+    add sourceSets.main, "slashrails.refmap.json"
+    config "slashrails.mixins.json"
+    config "slashrails-client.mixins.json"
+}
+
+sourceSets.main.java.srcDir(project.railsMainJava)
+sourceSets.main.java.srcDir(project.railsClientJava)
+sourceSets.main.resources.srcDirs += project.railsResources
+
+processResources {
+    def props = project.railsMixinExpand + [
+            version        : project.mod_version,
+            forge_range    : project.forge_range,
+            minecraft_range: project.minecraft_range,
+            refmap         : '\n  "refmap": "slashrails.refmap.json",',
+    ]
+    inputs.properties props
+    filesMatching(["META-INF/mods.toml", "slashrails.mixins.json", "slashrails-client.mixins.json"]) {
+        expand props
+    }
+}
+
+jar {
+    manifest { attributes("MixinConfigs": "slashrails.mixins.json,slashrails-client.mixins.json") }
+    from(new File(project.railsRootDir, "LICENSE")) { rename { "${it}_slashrails" } }
+}
+
+// The SRG-remapped jar is the one that ships (the plain `jar` output is Mojang-named and moves to
+// build/devlibs).
+tasks.named("reobfJar").configure { t ->
+    t.doLast {
+        def releaseDir = new File(project.railsRootDir, "build/release")
+        releaseDir.mkdirs()
+        def jar = t.archiveFile.get().asFile
+        java.nio.file.Files.copy(jar.toPath(), new File(releaseDir, jar.name).toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+    }
+}
+tasks.named("build").configure { dependsOn "reobfJar" }

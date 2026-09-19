@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.slashrails.mixin",
+  "package": "com.slashrails.mixin",${refmap}
   "compatibilityLevel": "${mixin_compat}",
   "mixins": [${mixins}],
   "injectors": {

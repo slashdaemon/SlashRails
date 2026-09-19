@@ -66,7 +66,7 @@ project.ext.railsResources = resources.findAll { it.isDirectory() }
 def readList = { File f -> f.isFile() ? f.readLines().collect { it.trim() }.findAll { it && !it.startsWith("#") } : [] }
 def mixins = ["AbstractMinecartMixin"]
 def clientMixins = []
-(compat + loaderVariants).each { dir ->
+([new File(root, "loader-${loaderName}")] + compat + loaderVariants).each { dir ->
     mixins += readList(new File(dir, "mixins.txt"))
     clientMixins += readList(new File(dir, "client-mixins.txt"))
 }
@@ -76,5 +76,6 @@ project.ext.railsMixinExpand = [
         mixins       : quote(mixins),
         client_mixins: quote(clientMixins),
         mixin_compat : "JAVA_" + (project.findProperty("java_version") ?: "21"),
+        refmap       : "",   // Forge sets its refmap name here
 ]
 project.ext.railsJava = (project.findProperty("java_version") ?: "21") as int
