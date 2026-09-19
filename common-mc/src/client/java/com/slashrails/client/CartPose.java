@@ -43,7 +43,7 @@ public final class CartPose {
     /** Arc length of (x, y, z) on the smoothed run under the cart, or null to fall back to vanilla. */
     @Nullable
     private static Double arcLength(AbstractMinecart cart, double x, double y, double z) {
-        if (!cart.level().isClientSide || ClientRuns.isEmpty()) return null;
+        if (!cart.level().isClientSide() || ClientRuns.isEmpty()) return null;
         CartRide ride = (CartRide) cart;
         int bx = Mth.floor(x), by = Mth.floor(y), bz = Mth.floor(z);
         ClientRuns.Slot slot = ClientRuns.at(BlockPos.asLong(bx, by, bz));

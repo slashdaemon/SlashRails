@@ -89,7 +89,7 @@ public final class RideProbe {
                         + "top speed %.1f m/s, %d ticks on a smoothed curve, %d ticks off rails",
                 why, s.ticks, s.maxTurn, s.turnSamples == 0 ? 0 : s.sumTurn / s.turnSamples,
                 s.maxSpeed * 20, s.onCurve, s.offRails);
-        SlashRails.LOG.info("[probe] {}: {}", player.getGameProfile().getName(), text);
+        SlashRails.LOG.info("[probe] {}: {}", player.getScoreboardName(), text);
         player.sendSystemMessage(Component.literal(text));
     }
 }

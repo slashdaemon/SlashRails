@@ -18,7 +18,7 @@ final class OverlayHook {
         NeoForge.EVENT_BUS.addListener(RenderLevelStageEvent.class, event -> {
             if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
             MultiBufferSource.BufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
-            CurveOverlay.render(new PoseStack(), buffers, event.getCamera().getPosition());
+            CurveOverlay.render(new PoseStack(), buffers, Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
             buffers.endBatch(RenderType.lines());
         });
     }
