@@ -69,6 +69,10 @@ makes in a single tick.
 
 Operators also get `/slashrails list`, `/slashrails testtrack …` and `/slashrails selftest`.
 
+## License
+
+[Creative Commons Attribution 4.0 International (CC-BY-4.0)](https://creativecommons.org/licenses/by/4.0/). See `LICENSE`.
+
 ---
 
 SlashRails is made by The Block Academy. Not an official Minecraft product; not approved by or

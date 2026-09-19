@@ -1,6 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "[2,)"
-license = "ARR"
+license = "CC-BY-4.0"
+issueTrackerURL = "https://github.com/slashdaemon/SlashRails/issues"
 
 [[mods]]
 modId = "slashrails"

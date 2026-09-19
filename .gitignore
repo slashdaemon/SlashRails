@@ -11,3 +11,5 @@ bin/
 *.log
 run-client/
 run-demo/
+.env
+__pycache__/

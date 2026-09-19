@@ -1,12 +1,8 @@
-# SlashRails 0.1.0 — release notes (DRAFT)
-
-> **Draft for owner review.** Not approved for publishing. Channels, license and store copy are
-> undecided (see "Open before publishing" at the end).
-
 ## SlashRails 0.1.0
 
-Long, gentle curves built from vanilla rails come out as zigzags, and the minecart ride over them
-jerks sideways at every step. SlashRails turns them into real curves.
+First release. Long, gentle curves built from vanilla rails come out as zigzags, and the minecart
+ride over them wiggles sideways at every step. SlashRails turns them into real curves, drawn smooth
+and ridden smooth, on the rails you already built.
 
 **How it works**
 - Craft a **Track Smoother** (rail, iron ingot, stick).
@@ -31,16 +27,3 @@ jerks sideways at every step. SlashRails turns them into real curves.
 - Flat track only: a run stops where the track goes up or down a slope.
 - A single sharp 90° corner can only be rounded slightly.
 - Furnace minecarts haven't been tested on curves yet.
-
----
-
-## Open before publishing
-
-- Owner sign-off on these notes and on each channel (GitHub release, Modrinth, CurseForge, Discord).
-- License: jars currently say `ARR`, matching StreamCraft. Confirm or change.
-- Item icon and mod logo are placeholders.
-- Creating a GitHub repo (`slashdaemon/SlashRails`, private) hasn't been done.
-- Verified: client rendering on Fabric and NeoForge; Sodium 0.6.13 (both loaders) and Iris 1.8.8
-  with a shader pack (Fabric); a client on a dedicated server receives runs on join and live adds
-  and removals. Not verified: Sodium 0.8.x, Iris on NeoForge, two clients at once, and a client
-  without the mod being turned away by a Fabric server.
