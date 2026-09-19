@@ -51,7 +51,7 @@ makes in a single tick.
 
 - Minecraft **1.20.1 through 26.3**:
   - Fabric (with Fabric API) on every version.
-  - NeoForge on 1.20.6 and later.
+  - NeoForge on 1.20.4 and on 1.20.6 and later.
   - MinecraftForge 1.20.1 — the same jar also runs on NeoForge 1.20.1.
 - Works with Sodium (tested 0.6.13) and Iris shaders (tested 1.8.8 on Fabric), on 1.21.1.
 - Needed on **both** the server and every client.

@@ -7,8 +7,10 @@ along it. The rails stay real vanilla blocks (redstone, powered/detector/activat
 working; removing the mod leaves the world intact). Design rationale and prior art:
 `docs/RESEARCH.md`.
 
-It ships for **every Minecraft version from 1.20.1 to 26.3** on Fabric and NeoForge, plus
-MinecraftForge 1.20.1 (that jar also runs on NeoForge 1.20.1): 25 jars from one source tree.
+It ships for **every Minecraft version from 1.20.1 to 26.3** on Fabric, on NeoForge from 1.20.4
+(except 1.20.5, which NeoForge skipped), and on MinecraftForge 1.20.1 (that jar also runs on NeoForge
+1.20.1): 28 jars from one source tree. NeoForge 1.20.2 is the one gap: ModDevGradle cannot build
+against NeoForge 20.2 (it publishes no MDG metadata), and 1.20.2 is covered on Fabric.
 
 ## Layout
 
@@ -54,19 +56,20 @@ never shadow a shared file — the source sync fails on duplicates.
 | tick hook | `tick-wrap-legacy` (MixinExtras) · `tick-redirect-legacy` (Forge 1.20.1 has no MixinExtras); 1.21.2+ lives in `cart-behavior` |
 | chunk | `chunk-moving` ≤1.21.4 (`boolean isMoving`) · `chunk-flags` 1.21.5+ (`int flags`) |
 | item | `item-plain` ≤1.21.1 · `item-setid` 1.21.2+ (`Properties.setId`) |
-| recipe | `recipe-1201` · `recipe-1205` (`recipes/`, result `id`) · `recipe-121` (`recipe/`) · `recipe-1212` (string ingredients) |
-| nbt / store | `nbt-plain` ≤1.21.4 · `nbt-optional` 1.21.5+; `store-legacy` 1.20.1 · `store-factory` 1.20.5–1.21.4 · `store-codec` 1.21.5+ with `savedtype-string` ≤1.21.11 / `savedtype-id` 26.1+ |
+| recipe | `recipe-1201` (1.20.1–1.20.4) · `recipe-1205` (`recipes/`, result `id`) · `recipe-121` (`recipe/`) · `recipe-1212` (string ingredients) |
+| nbt / store | `nbt-plain` ≤1.21.4 · `nbt-optional` 1.21.5+; `store-legacy` 1.20.1 · `store-factory-noprov` 1.20.2–1.20.4 · `store-factory` 1.20.5–1.21.4 · `store-codec` 1.21.5+ with `savedtype-string` ≤1.21.11 / `savedtype-id` 26.1+ |
 | ids | `ids-ctor` ≤1.20.6 · `ids-factory` 1.21+ |
 | sprites | `sprite-atlasfn` ≤1.21.8 · `sprite-atlasmanager` 1.21.9+ |
-| tooltip | `tooltip-level` 1.20.1 · `tooltip-context` 1.20.5–1.21.4 · `tooltip-display` 1.21.5+ |
-| lines | `lines-vertex` 1.20.1 · `lines-vertexpose` 1.20.5–1.20.6 · `lines-buffer` 1.21–1.21.10 · `lines-gizmo` 1.21.11+ (vanilla gizmos via a `DebugRenderer.emitGizmos` mixin, both loaders) |
-| misc | `shot-plain` ≤1.21.5 / `shot-scale` 1.21.6+; `perms-level` ≤1.21.10 / `perms-set` 1.21.11+; `net-bytebuf` 1.20.1 / `net-payload` 1.20.5+ |
+| tooltip | `tooltip-level` ≤1.20.4 · `tooltip-context` 1.20.5–1.21.4 · `tooltip-display` 1.21.5+ |
+| lines | `lines-vertex` ≤1.20.4 · `lines-vertexpose` 1.20.5–1.20.6 · `lines-buffer` 1.21–1.21.10 · `lines-gizmo` 1.21.11+ (vanilla gizmos via a `DebugRenderer.emitGizmos` mixin, both loaders) |
+| misc | `shot-plain` ≤1.21.5 / `shot-scale` 1.21.6+; `perms-level` ≤1.21.10 / `perms-set` 1.21.11+; `net-bytebuf` 1.20.1–1.20.4 channels · `net-payload1204` NeoForge 1.20.4 (`write`/`id` payloads) · `net-payload` 1.20.5+ |
 
 Loader variants — Fabric: rail model `model-forwarding-legacy` ≤1.20.6 · `model-forwarding` 1.21–1.21.3 ·
 `model-delegate` 1.21.4 · `model-blockstate` 1.21.5+; overlay hook `overlay-events` ≤1.21.8 ·
 `overlay-debugmixin` 1.21.9–1.21.10 (Fabric API has no world render events there) · `overlay-none`
-1.21.11+ (gizmos). NeoForge: rail hooks `cartext-minecart` ≤21.1 · `cartext-rail` 21.2–21.11 ·
-`cartext-none` 26.1+; model `model-bakedwrapper-legacy` 20.6 · `model-bakedwrapper` 21.1–21.3 ·
+1.21.11+ (gizmos). NeoForge: core `core-legacy` 20.4 (tick phases, `mods.toml`, payload handlers via `nfnet-payload1204`) ·
+`core-modern` 20.6+; rail hooks `cartext-minecart` ≤21.1 · `cartext-rail` 21.2–21.11 ·
+`cartext-none` 26.1+; model `model-bakedwrapper-legacy` 20.4–20.6 · `model-bakedwrapper` 21.1–21.3 ·
 `model-delegate` 21.4 · `model-blockstate` 21.5–21.11 · `model-blockstate26` 26.x; overlay
 `overlay-stage` ≤21.5 · `overlay-afterparticles` 21.6–21.10 · `overlay-none` 21.11+.
 
@@ -87,13 +90,14 @@ serves NeoForge 1.20.1 — do not bump it.
 
 ## Build / test
 
-JDK 21 (Prism `java-runtime-delta`, see `Projects/CLAUDE.md`); the 26.x nested builds need JDK 25
+JDK 21 (Prism `java-runtime-delta`, see `Projects/CLAUDE.md`). Bands for 1.20.1–1.20.4 compile to
+Java 17 (`java_version=17`: those Minecraft versions ship Java 17). The 26.x nested builds need JDK 25
 (`java-runtime-epsilon`, or set `JAVA25_HOME`). NeoForge 1.20.6/1.21.3 need one online resolve per
 checkout before `--offline` works.
 
 ```bash
 export JAVA_HOME="/c/Users/slash/AppData/Roaming/PrismLauncher/java/java-runtime-delta"
-./gradlew buildAll                          # core tests + all 25 jars -> build/release/
+./gradlew buildAll                          # core tests + all 28 jars -> build/release/
 ./gradlew :versions:1.21.5-fabric:build     # one band
 ./gradlew build263                          # one nested 26.x build (both loaders)
 scripts/selftest.sh 1.21.5-fabric           # dev server + /slashrails selftest over RCON

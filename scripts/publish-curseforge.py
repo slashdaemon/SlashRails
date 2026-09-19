@@ -67,6 +67,8 @@ BAND_GAME_VERSIONS = {
     # MC version it is advertised for. Adjacent versions share a JAR only where they share the API
     # the mod touches (see CLAUDE.md "Bands").
     ("1.20.1",  "fabric"):   ["1.20.1"],
+    ("1.20.2",  "fabric"):   ["1.20.2"],
+    ("1.20.4",  "fabric"):   ["1.20.3", "1.20.4"],
     ("1.20.5",  "fabric"):   ["1.20.5", "1.20.6"],
     ("1.21",    "fabric"):   ["1.21"],
     ("1.21.1",  "fabric"):   ["1.21.1"],
@@ -80,6 +82,7 @@ BAND_GAME_VERSIONS = {
     ("26.2",    "fabric"):   ["26.2"],
     ("26.3",    "fabric"):   ["26.3"],
 
+    ("1.20.4",  "neoforge"): ["1.20.4"],
     ("1.20.6",  "neoforge"): ["1.20.6"],
     ("1.21.1",  "neoforge"): ["1.21.1"],
     ("1.21.3",  "neoforge"): ["1.21.2", "1.21.3"],
@@ -124,10 +127,10 @@ def release_type_for(band: str, loader: str, requested: str) -> str:
         return "beta"
     return requested
 
-# 1.20.1 runs on JDK 17, 1.20.5 - 1.21.11 on JDK 21. The 26.x bands need JDK 25 but are tagged
+# 1.20.1 - 1.20.4 run on JDK 17, 1.20.5 - 1.21.11 on JDK 21. The 26.x bands need JDK 25 but are tagged
 # "Java 21" because CurseForge's catalog has no "Java 25" yet (the StreamCraft/SlashLoot convention).
 def java_version_for(band: str) -> str:
-    return "Java 17" if band == "1.20.1" else "Java 21"
+    return "Java 17" if band in ("1.20.1", "1.20.2", "1.20.4") else "Java 21"
 
 
 # CurseForge requires at least one tag from its "Environment" version group, or the upload is

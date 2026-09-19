@@ -1,3 +1,3 @@
 plugins { id "net.neoforged.moddev" }
-ext.rails = [compat: ["cart-legacy", "tick-wrap-legacy", "chunk-moving", "item-plain", "recipe-121", "nbt-plain", "store-factory", "ids-factory", "sprite-atlasfn", "tooltip-context", "shot-plain", "perms-level", "lines-buffer", "net-payload"], loader: ["cartext-minecart", "model-bakedwrapper", "overlay-stage"]]
+ext.rails = [compat: ["cart-legacy", "tick-wrap-legacy", "chunk-moving", "item-plain", "recipe-121", "nbt-plain", "store-factory", "ids-factory", "sprite-atlasfn", "tooltip-context", "shot-plain", "perms-level", "lines-buffer", "net-payload"], loader: ["core-modern", "cartext-minecart", "model-bakedwrapper", "overlay-stage"]]
 apply from: "${rootDir}/gradle/neoforge-band.gradle"

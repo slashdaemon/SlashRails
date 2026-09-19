@@ -33,7 +33,7 @@ public final class RunWire {
     }
 
     public static void writeRemove(FriendlyByteBuf buf, RemoveRunPayload p) {
-        buf.writeVarInt(p.id());
+        buf.writeVarInt(p.runId());
     }
 
     public static RemoveRunPayload readRemove(FriendlyByteBuf buf) {

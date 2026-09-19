@@ -1,7 +1,7 @@
 plugins { id "net.neoforged.moddev" }
 ext.rails = [
         compat : ["cart-behavior", "chunk-flags", "item-setid", "recipe-1212", "nbt-optional", "store-codec", "savedtype-id", "ids-factory", "sprite-atlasmanager", "tooltip-display", "shot-scale", "perms-set", "lines-gizmo", "net-payload"],
-        loader : ["cartext-none", "model-blockstate26", "overlay-none"],
+        loader : ["core-modern", "cartext-none", "model-blockstate26", "overlay-none"],
         renames: ["getvalue", "ride3", "mc1211", "mc261", "fabric261", "mc262"],
 ]
 apply from: "${rootDir}/../../gradle/neoforge-band.gradle"

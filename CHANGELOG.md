@@ -4,9 +4,9 @@
 
 Every Minecraft version from 1.20.1 to 26.3.
 
-- Fabric builds for 1.20.1, 1.20.5–1.20.6, 1.21, 1.21.1, 1.21.2–1.21.3, 1.21.4, 1.21.5,
+- Fabric builds for 1.20.1, 1.20.2, 1.20.3–1.20.4, 1.20.5–1.20.6, 1.21, 1.21.1, 1.21.2–1.21.3, 1.21.4, 1.21.5,
   1.21.6–1.21.8, 1.21.9–1.21.10, 1.21.11, 26.1.2, 26.2 and 26.3.
-- NeoForge builds for 1.20.6, 1.21.1, 1.21.2–1.21.3, 1.21.4, 1.21.5, 1.21.6–1.21.8, 1.21.9–1.21.10,
+- NeoForge builds for 1.20.4, 1.20.6, 1.21.1, 1.21.2–1.21.3, 1.21.4, 1.21.5, 1.21.6–1.21.8, 1.21.9–1.21.10,
   1.21.11, 26.1.2, 26.2 and 26.3 (26.3 as beta, like NeoForge 26.3 itself).
 - MinecraftForge 1.20.1 build, which also runs on NeoForge 1.20.1.
 - From 1.21.2, minecarts ride curves through Minecraft's new minecart-behaviour code; carts using the

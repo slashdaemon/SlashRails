@@ -1,0 +1,39 @@
+# NeoForge 20.2 - 20.4 mod manifest: still named mods.toml. `mandatory` is what 20.2 reads and
+# `type` what 20.4 reads; each ignores the other.
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "CC-BY-4.0"
+issueTrackerURL = "https://github.com/slashdaemon/SlashRails/issues"
+
+[[mods]]
+modId = "slashrails"
+version = "${version}"
+displayName = "SlashRails"
+authors = "Slash"
+logoFile = "assets/slashrails/icon.png"
+description = '''
+Turns zigzag rail staircases into smooth curves: smooth to look at and smooth to ride in a vanilla minecart. Use the Track Smoother on a rail.
+'''
+displayURL = "https://theblock.academy"
+
+[[mixins]]
+config = "slashrails.mixins.json"
+
+[[mixins]]
+config = "slashrails-client.mixins.json"
+
+[[dependencies.slashrails]]
+modId = "neoforge"
+mandatory = true
+type = "required"
+versionRange = "${neoforge_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.slashrails]]
+modId = "minecraft"
+mandatory = true
+type = "required"
+versionRange = "${minecraft_range}"
+ordering = "NONE"
+side = "BOTH"

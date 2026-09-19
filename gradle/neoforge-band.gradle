@@ -79,12 +79,14 @@ processResources {
             minecraft_range: project.minecraft_range,
     ]
     inputs.properties props
-    filesMatching(["META-INF/neoforge.mods.toml", "slashrails.mixins.json", "slashrails-client.mixins.json"]) {
+    filesMatching(["META-INF/neoforge.mods.toml", "META-INF/mods.toml", "slashrails.mixins.json", "slashrails-client.mixins.json"]) {
         expand props
     }
 }
 
 jar {
+    // NeoForge 20.2 - 20.4 still read mixin configs from the manifest as well as mods.toml.
+    manifest { attributes("MixinConfigs": "slashrails.mixins.json,slashrails-client.mixins.json") }
     from(new File(project.railsRootDir, "LICENSE")) { rename { "${it}_slashrails" } }
 }
 

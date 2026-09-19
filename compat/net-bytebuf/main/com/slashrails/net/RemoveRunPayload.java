@@ -4,7 +4,7 @@ import com.slashrails.SlashRails;
 import net.minecraft.resources.ResourceLocation;
 
 /** Server -> client: a smoothed run was reverted to vanilla rails. (MC 1.20.1 channel message.) */
-public record RemoveRunPayload(int id) {
+public record RemoveRunPayload(int runId) {
 
     public static final ResourceLocation ID = SlashRails.id("remove_run");
 }

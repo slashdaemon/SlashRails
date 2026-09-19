@@ -50,6 +50,8 @@ BAND_GAME_VERSIONS = {
     # MC version it is advertised for. Adjacent versions share a JAR only where they share the API
     # the mod touches (see CLAUDE.md "Bands").
     ("1.20.1",  "fabric"):   ["1.20.1"],
+    ("1.20.2",  "fabric"):   ["1.20.2"],
+    ("1.20.4",  "fabric"):   ["1.20.3", "1.20.4"],
     ("1.20.5",  "fabric"):   ["1.20.5", "1.20.6"],
     ("1.21",    "fabric"):   ["1.21"],
     ("1.21.1",  "fabric"):   ["1.21.1"],
@@ -63,6 +65,7 @@ BAND_GAME_VERSIONS = {
     ("26.2",    "fabric"):   ["26.2"],
     ("26.3",    "fabric"):   ["26.3"],
 
+    ("1.20.4",  "neoforge"): ["1.20.4"],
     ("1.20.6",  "neoforge"): ["1.20.6"],
     ("1.21.1",  "neoforge"): ["1.21.1"],
     ("1.21.3",  "neoforge"): ["1.21.2", "1.21.3"],

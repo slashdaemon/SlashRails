@@ -6,7 +6,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 /** Server -> client: a smoothed run was reverted to vanilla rails. (MC 1.20.5+ payload.) */
-public record RemoveRunPayload(int id) implements CustomPacketPayload {
+public record RemoveRunPayload(int runId) implements CustomPacketPayload {
 
     public static final Type<RemoveRunPayload> TYPE = new Type<>(SlashRails.id("remove_run"));
 

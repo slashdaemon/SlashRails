@@ -69,7 +69,7 @@ public final class ClientRuns {
     }
 
     public static void handle(RemoveRunPayload payload) {
-        SmoothRun run = RUNS.get(payload.id());
+        SmoothRun run = RUNS.get(payload.runId());
         if (run != null) removeInternal(run);
     }
 

@@ -39,6 +39,7 @@ def bands = [
         "1.20.1-forge",
         "1.20.2-fabric",
         "1.20.4-fabric",
+        "1.20.4-neoforge",
         "1.20.5-fabric",
         "1.20.6-neoforge",
         "1.21-fabric",
@@ -83,4 +84,20 @@ tasks.register("buildAll") {
     dependsOn ":core:test"
     bands.each { dependsOn ":versions:${it}:build" }
     nestedBands.each { dependsOn "build" + it.replace(".", "") }
+
+    // Collect every band's shipping jar (up-to-date bands included) into one place.
+    doLast {
+        def releaseDir = layout.buildDirectory.dir("release").get().asFile
+        releaseDir.deleteDir()
+        releaseDir.mkdirs()
+        def libDirs = bands.collect { project(":versions:${it}").layout.buildDirectory.dir("libs").get().asFile } +
+                nestedBands.collectMany { mc -> ["band-fabric", "band-neoforge"].collect { file("versions/${mc}/${it}/build/libs") } }
+        libDirs.each { dir ->
+            dir.listFiles()?.findAll { it.name.endsWith(".jar") && !it.name.contains("-dev") && !it.name.contains("-sources") }?.each { jar ->
+                java.nio.file.Files.copy(jar.toPath(), new File(releaseDir, jar.name).toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+            }
+        }
+        println "Collected ${releaseDir.listFiles().length} jars in ${releaseDir}"
+    }
 }
