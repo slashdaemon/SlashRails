@@ -10,7 +10,7 @@ Other fixes tackle one half. Resource packs make 45° runs *look* straight, but 
 - **Rides smooth.** Vanilla minecarts follow the curve instead of the zigzag.
 - **Any gentle angle**, not just 45°. A 1:2, 1:3, 1:8 staircase, a wide arc, an S-bend or a full loop all smooth.
 - **No new blocks, no special carts, no experimental toggles.** Your rails stay vanilla rails. Remove the mod and the world is exactly as you built it.
-- **Fabric and NeoForge**, Minecraft 1.21.1.
+- **Minecraft 1.20.1 to 26.3** — Fabric on every version, plus NeoForge and Forge (see Compatibility).
 
 ![A vanilla 1:3 rail staircase](https://raw.githubusercontent.com/slashdaemon/SlashRails/master/docs/images/staircase-vanilla.png)
 
@@ -57,15 +57,17 @@ The built-in self-test rides a cart over each track shape, first on vanilla rail
 
 SlashRails is needed on **both the server and every client**.
 
-1. Drop the JAR matching your loader into `mods/`: `-fabric` or `-neoforge`.
-2. On Fabric, add Fabric API. NeoForge needs nothing extra.
+1. Drop the JAR matching your Minecraft version and loader into `mods/`: `-fabric`, `-neoforge` or `-forge`.
+2. On Fabric, add Fabric API. NeoForge and Forge need nothing extra.
 3. Start the game or server.
 
 ## Compatibility
 
-- **Minecraft 1.21.1** — Fabric (with Fabric API) and NeoForge.
-- **Sodium** — tested with 0.6.13 on both loaders.
-- **Iris** — tested with 1.8.8 and a shader pack on Fabric.
+- **Fabric** (with Fabric API) — every Minecraft version from 1.20.1 to 26.3.
+- **NeoForge** — 1.20.4, and every version from 1.20.6 to 26.3 (26.3 as beta, like NeoForge 26.3 itself).
+- **Forge** — 1.20.1. The same file also runs on NeoForge 1.20.1.
+- **Sodium** — tested with 0.6.13 on 1.21.1, both loaders.
+- **Iris** — tested with 1.8.8 and a shader pack on 1.21.1 Fabric.
 
 ## Configuration
 
