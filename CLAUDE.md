@@ -7,8 +7,9 @@ along it. The rails stay real vanilla blocks (redstone, powered/detector/activat
 working; removing the mod leaves the world intact). Design rationale and prior art:
 `docs/RESEARCH.md`.
 
-It ships for **every Minecraft version from 1.20.1 to 26.3** on Fabric, on NeoForge from 1.20.4
-(except 1.20.5, which NeoForge skipped), and on MinecraftForge 1.20.1 (that jar also runs on NeoForge
+It ships for **every Minecraft version from 1.20.1 to 26.3** on Fabric, on every NeoForge line from
+1.20.4 that has a stable build (NeoForge 1.20.3, 1.20.5, 21.6, 21.7 and 21.9 only ever shipped
+betas), and on MinecraftForge 1.20.1 (that jar also runs on NeoForge
 1.20.1): 28 jars from one source tree. NeoForge 1.20.2 is the one gap: ModDevGradle cannot build
 against NeoForge 20.2 (it publishes no MDG metadata), and 1.20.2 is covered on Fabric.
 
