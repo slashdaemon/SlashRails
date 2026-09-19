@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.phys.Vec3;
 
-/** Draws {@link CurveOverlay}'s curves as camera-relative line segments (MC 1.20.1: vertex/endVertex API, normals by matrix). */
+/** Draws {@link CurveOverlay}'s curves as camera-relative line segments (MC 1.20.5 - 1.20.6: vertex/endVertex API, normals by pose). */
 public final class CurveLines {
 
     private CurveLines() {
@@ -27,9 +27,9 @@ public final class CurveLines {
                     dz /= len;
                 }
                 out.vertex(pose.pose(), (float) (x0 - cam.x), (float) (y0 - cam.y), (float) (z0 - cam.z))
-                        .color(r, g, b, 1f).normal(pose.normal(), dx, dy, dz).endVertex();
+                        .color(r, g, b, 1f).normal(pose, dx, dy, dz).endVertex();
                 out.vertex(pose.pose(), (float) (x1 - cam.x), (float) (y1 - cam.y), (float) (z1 - cam.z))
-                        .color(r, g, b, 1f).normal(pose.normal(), dx, dy, dz).endVertex();
+                        .color(r, g, b, 1f).normal(pose, dx, dy, dz).endVertex();
             });
         });
     }
