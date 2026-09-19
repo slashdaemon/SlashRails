@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 — unreleased
+## 0.2.0 — 2026-09-19
 
 Every Minecraft version from 1.20.1 to 26.3.
 
