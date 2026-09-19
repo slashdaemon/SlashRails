@@ -2,11 +2,8 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.slashrails.client.mixin",
-  "compatibilityLevel": "JAVA_21",
-  "client": [
-    "AbstractMinecartClientMixin",
-    "GameRendererDemoMixin"
-  ],
+  "compatibilityLevel": "${mixin_compat}",
+  "client": [${client_mixins}],
   "injectors": {
     "defaultRequire": 1
   }

@@ -76,7 +76,7 @@ public final class RideProbe {
             }
             s.last = pos;
             if (((CartRide) cart).slashrails$runId() != 0) s.onCurve++;
-            if (!((com.slashrails.mixin.AbstractMinecartAccessor) cart).slashrails$isOnRails()) s.offRails++;
+            if (!com.slashrails.ride.Carts.isOnRails(cart)) s.offRails++;
             if (++s.ticks >= s.total) {
                 report(player, s, "done");
                 it.remove();

@@ -2,7 +2,6 @@ package com.slashrails.ride;
 
 import com.slashrails.core.Pt;
 import com.slashrails.core.SmoothCurve;
-import com.slashrails.mixin.AbstractMinecartAccessor;
 import com.slashrails.platform.Platform;
 import com.slashrails.run.SmoothRun;
 import com.slashrails.run.SmoothRunRegistry;
@@ -71,7 +70,7 @@ public final class CurveRide {
             ride.slashrails$clear();
             return false;
         }
-        ((AbstractMinecartAccessor) cart).slashrails$setOnRails(true);
+        Carts.setOnRails(cart, true);
         return true;
     }
 
@@ -156,7 +155,7 @@ public final class CurveRide {
 
         // Velocity along the new tangent, then vanilla's slowdown (virtual: furnace carts add push).
         cart.setDeltaMovement(t2.x() * sign * speed, 0, t2.z() * sign * speed);
-        ((AbstractMinecartAccessor) cart).slashrails$applyNaturalSlowdown();
+        Carts.applyNaturalSlowdown(cart);
         Vec3 slowed = cart.getDeltaMovement();
         double a2 = slowed.x * t2.x() + slowed.z * t2.z();
         if (Math.abs(a2) > 1e-9) sign = a2 > 0 ? 1 : -1;

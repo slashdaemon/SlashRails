@@ -1,0 +1,97 @@
+// Composes one NeoForge band JAR from the same shared tree the Fabric bands use:
+//
+//   plugins { id "net.neoforged.moddev" }
+//   ext.rails = [compat: [...], loader: [...]]
+//   apply from: "${rootDir}/gradle/neoforge-band.gradle"
+//
+// NeoForge has no Loom-style client split: client sources join main and are kept off dedicated
+// servers by the mixin "client" array and Dist.CLIENT-only entrypoints.
+
+ext.railsLoader = "neoforge"
+apply from: "${rootDir}/gradle/band-sources.gradle"
+
+version = ""
+
+base {
+    archivesName = "${rootProject.archives_base_name}-${rootProject.mod_version}+mc${project.minecraft_version}-neoforge"
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = project.railsJava
+    it.options.encoding = "UTF-8"
+}
+
+neoForge {
+    version = project.neoforge_version
+    if (project.hasProperty("parchment_mappings_version")) {
+        parchment {
+            minecraftVersion = project.parchment_minecraft_version
+            mappingsVersion = project.parchment_mappings_version
+        }
+    }
+    runs {
+        client { client() }
+        // Headless instead of --nogui (no GUI either way): LocalServer's testkit force-kills every
+        // java process whose command line contains "nogui" when it switches bands.
+        server {
+            server()
+            systemProperty "java.awt.headless", "true"
+        }
+        // Dev-only scripted screenshots (common-mc VisualTest): needs run/saves/visual-world.
+        visualTest {
+            client()
+            systemProperty "slashrails.visualtest", "true"
+            programArguments.addAll("--quickPlaySingleplayer", "visual-world")
+        }
+    }
+    mods {
+        slashrails {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+repositories {
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content { includeGroup "maven.modrinth" }
+    }
+}
+
+// Compatibility testing only, never bundled: -Psodium=<version> [-Piris=<version>]
+// e.g. -Psodium=mc1.21.1-0.6.13-neoforge -Piris=1.8.8+1.21.1-neoforge
+dependencies {
+    if (project.hasProperty("sodium")) runtimeOnly "maven.modrinth:sodium:${project.sodium}"
+    if (project.hasProperty("iris")) runtimeOnly "maven.modrinth:iris:${project.iris}"
+}
+
+sourceSets.main.java.srcDir(project.railsMainJava)
+sourceSets.main.java.srcDir(project.railsClientJava)
+sourceSets.main.resources.srcDirs += project.railsResources
+
+processResources {
+    def props = project.railsMixinExpand + [
+            version        : rootProject.mod_version,
+            neoforge_range : project.neoforge_range,
+            minecraft_range: project.minecraft_range,
+    ]
+    inputs.properties props
+    filesMatching(["META-INF/neoforge.mods.toml", "slashrails.mixins.json", "slashrails-client.mixins.json"]) {
+        expand props
+    }
+}
+
+jar {
+    from(rootProject.file("LICENSE")) { rename { "${it}_slashrails" } }
+}
+
+tasks.named("jar").configure { t ->
+    t.doLast {
+        def releaseDir = rootProject.layout.buildDirectory.dir("release").get().asFile
+        releaseDir.mkdirs()
+        def jar = t.archiveFile.get().asFile
+        java.nio.file.Files.copy(jar.toPath(), new File(releaseDir, jar.name).toPath(),
+                java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+    }
+}

@@ -31,32 +31,16 @@ subprojects {
     }
 }
 
-// Every band's shipping jar is copied to build/release/ so there is one place to look.
-def releaseDir = layout.buildDirectory.dir("release").get().asFile
-
-project(":versions:1.21.1-fabric") {
-    tasks.matching { it.name == "remapJar" }.configureEach { t ->
-        t.doLast {
-            releaseDir.mkdirs()
-            def jar = t.archiveFile.get().asFile
-            java.nio.file.Files.copy(jar.toPath(), new File(releaseDir, jar.name).toPath(),
-                    java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-        }
-    }
-}
-project(":versions:1.21.1-neoforge") {
-    tasks.matching { it.name == "jar" }.configureEach { t ->
-        t.doLast {
-            releaseDir.mkdirs()
-            def jar = t.archiveFile.get().asFile
-            java.nio.file.Files.copy(jar.toPath(), new File(releaseDir, jar.name).toPath(),
-                    java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-        }
-    }
-}
+// Every band this composite builds. Each is versions/<name>/ = build.gradle (variant list) +
+// gradle.properties (coordinates). See CLAUDE.md "Bands" for what each covers.
+def bands = [
+        "1.21.1-fabric",
+        "1.21.1-neoforge",
+]
 
 tasks.register("buildAll") {
     group = "build"
     description = "Runs core tests and builds every band; jars land in build/release/."
-    dependsOn ":core:test", ":versions:1.21.1-fabric:build", ":versions:1.21.1-neoforge:build"
+    dependsOn ":core:test"
+    bands.each { dependsOn ":versions:${it}:build" }
 }

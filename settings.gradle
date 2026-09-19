@@ -22,9 +22,7 @@ rootProject.name = 'slashrails'
 // Pure-Java curve math (no Minecraft), unit-tested. Bands compile its sources in directly.
 include 'core'
 
-// Source-only trees (not Gradle projects), absorbed by each band via srcDirs:
-//   common-mc/       shared MC code, Mojang names   (src/main + src/client)
-//   loader-fabric/   Fabric bridge                   (src/main + src/client)
-//   loader-neoforge/ NeoForge bridge                 (src/main)
-include 'versions:1.21.1-fabric'    // Band C: MC 1.21–1.21.1
-include 'versions:1.21.1-neoforge'  // Band C NeoForge: NF 21.1.x
+// Shared source trees (core/, common-mc/, compat/, loader-*/) are not Gradle projects: each band
+// compiles them in via gradle/band-sources.gradle.
+include 'versions:1.21.1-fabric'
+include 'versions:1.21.1-neoforge'

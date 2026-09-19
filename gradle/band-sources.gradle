@@ -1,0 +1,76 @@
+// Shared source composition for every band, applied by gradle/{fabric,neoforge,forge}-band.gradle.
+//
+// A band's build.gradle declares only which compat variants it needs:
+//
+//   ext.rails = [compat: ["cart-legacy", "net-payload", ...], loader: ["model-bakedwrapper", ...]]
+//
+// `compat` names directories under compat/, `loader` names directories under
+// loader-<loader>/variants/. Each may hold:
+//
+//   main/          common Java           (joined to the band's main source set)
+//   client/        client-only Java      (Fabric: the client source set; NeoForge/Forge: main)
+//   resources/     assets/data           (main resources)
+//   mixins.txt     mixin classes it adds to slashrails.mixins.json, one per line
+//   client-mixins.txt   same, for the client section
+//
+// Everything else comes from core/ and common-mc/, compiled once per band against that band's
+// Minecraft. A fix to shared logic is written once; a compat directory holds only the calls that
+// differ between Minecraft versions.
+
+def rails = project.ext.rails
+def root = rootProject.projectDir
+def loaderName = project.ext.railsLoader
+def compat = (rails.compat ?: []).collect { new File(root, "compat/${it}") }
+def loaderVariants = (rails.loader ?: []).collect { new File(root, "loader-${loaderName}/variants/${it}") }
+(compat + loaderVariants).each { assert it.isDirectory(): "missing variant directory ${it}" }
+
+def mainJava = [new File(root, "core/src/main/java"), new File(root, "common-mc/src/main/java"),
+                new File(root, "loader-${loaderName}/src/main/java")]
+def clientJava = [new File(root, "common-mc/src/client/java"), new File(root, "loader-${loaderName}/src/client/java")]
+def resources = [new File(root, "common-mc/src/main/resources"), new File(root, "loader-${loaderName}/src/main/resources")]
+(compat + loaderVariants).each { dir ->
+    mainJava += new File(dir, "main")
+    clientJava += new File(dir, "client")
+    resources += new File(dir, "resources")
+}
+// Dev-only tools (scripted screenshots, store-gallery demo takes) exist on the primary band only.
+if (rails.devtools) clientJava += new File(root, "common-mc/src/devtools/java")
+
+// Shared sources are copied through a rename pass before compiling. A band lists whole-word
+// renames for classes and packages Mojang moved (e.g. ResourceLocation -> Identifier at 1.21.11)
+// instead of forking every file that mentions them:
+//   renames: ["\bResourceLocation\b": "Identifier"]      (regex -> replacement)
+def renames = (rails.renames ?: [:]) as Map
+def generated = { String name, List<File> dirs ->
+    def out = layout.buildDirectory.dir("railsSrc/${name}")
+    def task = tasks.register("railsSources" + name.capitalize(), Sync) {
+        from(dirs.findAll { it.isDirectory() })
+        into(out)
+        duplicatesStrategy = DuplicatesStrategy.FAIL // a variant must never shadow a shared file
+        inputs.property("renames", renames.toString())
+        if (!renames.isEmpty()) {
+            filter { String line -> renames.inject(line) { String l, e -> l.replaceAll(e.key as String, e.value as String) } }
+        }
+    }
+    return files(out).builtBy(task)
+}
+project.ext.railsMainJava = generated("main", mainJava)
+project.ext.railsClientJava = generated("client", clientJava)
+project.ext.railsResources = resources.findAll { it.isDirectory() }
+
+// Mixin lists: the shared ones plus whatever each variant contributes.
+def readList = { File f -> f.isFile() ? f.readLines().collect { it.trim() }.findAll { it && !it.startsWith("#") } : [] }
+def mixins = ["AbstractMinecartMixin"]
+def clientMixins = []
+(compat + loaderVariants).each { dir ->
+    mixins += readList(new File(dir, "mixins.txt"))
+    clientMixins += readList(new File(dir, "client-mixins.txt"))
+}
+if (rails.devtools) clientMixins += "GameRendererDemoMixin"
+def quote = { List l -> l.collect { "\"${it}\"" }.join(", ") }
+project.ext.railsMixinExpand = [
+        mixins       : quote(mixins),
+        client_mixins: quote(clientMixins),
+        mixin_compat : (project.findProperty("java_version") ?: "21") == "17" ? "JAVA_17" : "JAVA_21",
+]
+project.ext.railsJava = (project.findProperty("java_version") ?: "21") as int

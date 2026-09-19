@@ -3,7 +3,6 @@ package com.slashrails.command;
 import com.slashrails.SlashRails;
 import com.slashrails.core.Dir;
 import com.slashrails.core.RailNode;
-import com.slashrails.mixin.AbstractMinecartAccessor;
 import com.slashrails.ride.CartRide;
 import com.slashrails.run.RunService;
 import net.minecraft.commands.CommandSourceStack;
@@ -239,7 +238,7 @@ public final class SelfTest {
                 r.reached = true;
             }
         }
-        if (!r.reached && !((AbstractMinecartAccessor) cart).slashrails$isOnRails()) r.offRails++;
+        if (!r.reached && !com.slashrails.ride.Carts.isOnRails(cart)) r.offRails++;
 
         boolean stalled = r.ticks > 40 && cart.getDeltaMovement().horizontalDistanceSqr() < 1e-6;
         if (r.reached || r.ticks >= TIMEOUT || stalled || !cart.isAlive()) finishPhase();

@@ -1,7 +1,6 @@
 package com.slashrails.fabric;
 
 import com.slashrails.SlashRails;
-import com.slashrails.mixin.AbstractMinecartAccessor;
 import com.slashrails.net.RunsPayload;
 import com.slashrails.platform.Platform;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -34,7 +33,7 @@ final class FabricPlatform implements Platform {
 
     @Override
     public double maxRailSpeed(AbstractMinecart cart) {
-        return ((AbstractMinecartAccessor) cart).slashrails$getMaxSpeed();
+        return com.slashrails.ride.Carts.vanillaMaxSpeed(cart);
     }
 
     @Override

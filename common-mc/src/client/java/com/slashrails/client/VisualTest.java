@@ -31,12 +31,33 @@ public final class VisualTest {
     private static int index;
     private static int wait = -1;
 
+    /** Store-gallery demo takes (common-mc/src/devtools), present on the primary band only. */
+    private static final java.util.function.Consumer<Minecraft> DEMO = demoHook();
+
     private VisualTest() {
+    }
+
+    private static java.util.function.Consumer<Minecraft> demoHook() {
+        try {
+            java.lang.invoke.MethodHandle tick = java.lang.invoke.MethodHandles.publicLookup().findStatic(
+                    Class.forName("com.slashrails.client.demo.DemoScenes"), "tick",
+                    java.lang.invoke.MethodType.methodType(void.class, Minecraft.class));
+            return mc -> {
+                try {
+                    tick.invoke(mc);
+                } catch (Throwable t) {
+                    throw new RuntimeException(t);
+                }
+            };
+        } catch (ReflectiveOperationException e) {
+            return mc -> {
+            };
+        }
     }
 
     /** Client tick (end). */
     public static void tick(Minecraft mc) {
-        com.slashrails.client.demo.DemoScenes.tick(mc);
+        DEMO.accept(mc);
         if (MP) {
             mpTick(mc);
             return;

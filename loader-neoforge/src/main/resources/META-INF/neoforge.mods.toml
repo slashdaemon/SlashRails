@@ -23,13 +23,13 @@ config = "slashrails-client.mixins.json"
 [[dependencies.slashrails]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.1,)"
+versionRange = "${neoforge_range}"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.slashrails]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21,1.21.2)"
+versionRange = "${minecraft_range}"
 ordering = "NONE"
 side = "BOTH"
