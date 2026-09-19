@@ -123,6 +123,14 @@ that never lights. `/slashrails testtrack <kind> [size] [smooth]` builds one fix
 `/slashrails probe` measures a ride you're on. The self-test covers the server side only; rendering
 (rail models, cart pose, overlay) needs a client (`runVisualTest`).
 
+`python scripts/prodtest.py --all` (or named targets) is the release gate: it runs every **shipped**
+jar from `build/release/` on a real server built by the loader's own launcher/installer (Fabric
+server launcher + Fabric API; NeoForge/Forge installers; the Forge jar again on NeoForge 1.20.1) and
+drives `/slashrails selftest` over RCON (ports 25596/25597, servers kept in `build/prodtest/`). Dev
+runs are Mojang-named; production is intermediary (Fabric) or SRG (Forge 1.20.1), so only this
+catches a broken refmap. A full run takes about two hours; it needs no Gradle, so client tests can
+run beside it.
+
 `scripts/visualtest.sh <band> [world]` (**opens a client window — ask first**) copies the band's
 last self-test world into `run/saves/visual-world`, runs `runVisualTest` and quits; it saves 11
 scripted screenshots to `run/screenshots/slashrails-*.png` (vanilla vs smoothed staircase, arc,
