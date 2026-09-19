@@ -8,7 +8,6 @@ import com.slashrails.net.RunsPayload;
 import com.slashrails.platform.Platform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -49,7 +48,8 @@ public final class RunService {
             SlashRails.LOG.error("Could not fit a curve over the run at {}", clicked, e);
             return Component.translatable("slashrails.fail.fit");
         }
-        broadcast(level, new RunsPayload(false, List.of(run)));
+        RunsPayload added = new RunsPayload(false, List.of(run));
+        broadcast(level, p -> Platform.get().sendRuns(p, added));
         Component msg = Component.translatable(r.closed() ? "slashrails.smoothed_loop" : "slashrails.smoothed", run.size());
         int tight = run.tightCount();
         if (tight > 0) {
@@ -67,7 +67,8 @@ public final class RunService {
         SmoothRun run = registry.runAt(pos);
         if (run == null) return 0;
         registry.remove(run);
-        broadcast(level, new RemoveRunPayload(run.id()));
+        RemoveRunPayload removed = new RemoveRunPayload(run.id());
+        broadcast(level, p -> Platform.get().sendRemove(p, removed));
         return run.size();
     }
 
@@ -95,7 +96,8 @@ public final class RunService {
             RailNode node = nodeAt(run, pos);
             if (node == null || !RailGeometry.matches(state, node)) {
                 registry.remove(run);
-                broadcast(level, new RemoveRunPayload(run.id()));
+                RemoveRunPayload removed = new RemoveRunPayload(run.id());
+        broadcast(level, p -> Platform.get().sendRemove(p, removed));
             }
         }
     }
@@ -113,12 +115,12 @@ public final class RunService {
     public static void sendSnapshot(ServerPlayer player) {
         if (!Platform.get().clientHasMod(player)) return;
         SmoothRunRegistry registry = SmoothRunRegistry.get((net.minecraft.server.level.ServerLevel) player.level());
-        Platform.get().sendToPlayer(player, new RunsPayload(true, new ArrayList<>(registry.all())));
+        Platform.get().sendRuns(player, new RunsPayload(true, new ArrayList<>(registry.all())));
     }
 
-    private static void broadcast(ServerLevel level, CustomPacketPayload payload) {
+    private static void broadcast(ServerLevel level, java.util.function.Consumer<ServerPlayer> send) {
         for (ServerPlayer p : level.players()) {
-            if (Platform.get().clientHasMod(p)) Platform.get().sendToPlayer(p, payload);
+            if (Platform.get().clientHasMod(p)) send.accept(p);
         }
     }
 }

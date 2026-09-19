@@ -3,8 +3,6 @@ package com.slashrails.fabric;
 import com.slashrails.SlashRails;
 import com.slashrails.command.SlashRailsCommand;
 import com.slashrails.item.ModItems;
-import com.slashrails.net.RemoveRunPayload;
-import com.slashrails.net.RunsPayload;
 import com.slashrails.platform.Platform;
 import com.slashrails.run.RunService;
 import net.fabricmc.api.ModInitializer;
@@ -13,9 +11,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -32,11 +28,10 @@ public final class SlashRailsFabric implements ModInitializer {
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES)
                 .register(entries -> entries.accept(ModItems.trackSmoother));
 
-        PayloadTypeRegistry.playS2C().register(RunsPayload.TYPE, RunsPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(RemoveRunPayload.TYPE, RemoveRunPayload.CODEC);
+        FabricNet.register();
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            if (!ServerPlayNetworking.canSend(handler.player, RunsPayload.TYPE)) {
+            if (!FabricNet.canSend(handler.player)) {
                 // Plain text: a client without the mod has no translation for it.
                 handler.disconnect(Component.literal("This server uses SlashRails. Install SlashRails "
                         + FabricPlatform.modVersion() + " on your client to join."));

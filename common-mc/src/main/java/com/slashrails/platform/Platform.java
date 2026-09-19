@@ -1,7 +1,8 @@
 package com.slashrails.platform;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.slashrails.net.RemoveRunPayload;
+import com.slashrails.net.RunsPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
@@ -12,7 +13,9 @@ import java.nio.file.Path;
 /** The few things the shared code needs from the mod loader. Set once by the loader entrypoint. */
 public interface Platform {
 
-    void sendToPlayer(ServerPlayer player, CustomPacketPayload payload);
+    void sendRuns(ServerPlayer player, RunsPayload payload);
+
+    void sendRemove(ServerPlayer player, RemoveRunPayload payload);
 
     /** Whether the player's client has SlashRails (it is required on both sides). */
     boolean clientHasMod(ServerPlayer player);

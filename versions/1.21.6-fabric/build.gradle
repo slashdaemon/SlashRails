@@ -1,7 +1,7 @@
 plugins { id "fabric-loom" }
 ext.rails = [
-        compat : ["cart-behavior", "chunk-flags", "item-setid", "recipe-1212", "nbt-optional", "store-codec", "savedtype-string", "ids-factory", "sprite-atlasfn", "tooltip-display", "shot-scale", "perms-level", "lines-buffer"],
-        loader : ["model-blockstate", "overlay-events"],
+        compat : ["cart-behavior", "chunk-flags", "item-setid", "recipe-1212", "nbt-optional", "store-codec", "savedtype-string", "ids-factory", "sprite-atlasfn", "tooltip-display", "shot-scale", "perms-level", "lines-buffer", "net-payload"],
+        loader : ["model-blockstate", "overlay-events", "net-payload"],
         renames: ["getvalue"],
 ]
 apply from: "${rootDir}/gradle/fabric-band.gradle"

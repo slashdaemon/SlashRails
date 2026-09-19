@@ -1,12 +1,11 @@
 package com.slashrails.fabric;
 
 import com.slashrails.SlashRails;
+import com.slashrails.net.RemoveRunPayload;
 import com.slashrails.net.RunsPayload;
 import com.slashrails.platform.Platform;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
@@ -22,13 +21,18 @@ final class FabricPlatform implements Platform {
     }
 
     @Override
-    public void sendToPlayer(ServerPlayer player, CustomPacketPayload payload) {
-        ServerPlayNetworking.send(player, payload);
+    public void sendRuns(ServerPlayer player, RunsPayload payload) {
+        FabricNet.sendRuns(player, payload);
+    }
+
+    @Override
+    public void sendRemove(ServerPlayer player, RemoveRunPayload payload) {
+        FabricNet.sendRemove(player, payload);
     }
 
     @Override
     public boolean clientHasMod(ServerPlayer player) {
-        return ServerPlayNetworking.canSend(player, RunsPayload.TYPE);
+        return FabricNet.canSend(player);
     }
 
     @Override

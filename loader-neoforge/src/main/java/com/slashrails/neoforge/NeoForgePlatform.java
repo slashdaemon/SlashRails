@@ -1,9 +1,9 @@
 package com.slashrails.neoforge;
 
+import com.slashrails.net.RemoveRunPayload;
 import com.slashrails.net.RunsPayload;
 import com.slashrails.platform.Platform;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.level.Level;
@@ -17,7 +17,12 @@ import java.nio.file.Path;
 final class NeoForgePlatform implements Platform {
 
     @Override
-    public void sendToPlayer(ServerPlayer player, CustomPacketPayload payload) {
+    public void sendRuns(ServerPlayer player, RunsPayload payload) {
+        PacketDistributor.sendToPlayer(player, payload);
+    }
+
+    @Override
+    public void sendRemove(ServerPlayer player, RemoveRunPayload payload) {
         PacketDistributor.sendToPlayer(player, payload);
     }
 

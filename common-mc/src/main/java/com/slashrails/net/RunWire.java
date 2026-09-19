@@ -1,42 +1,43 @@
 package com.slashrails.net;
 
-import com.slashrails.SlashRails;
 import com.slashrails.core.Dir;
 import com.slashrails.core.RailNode;
 import com.slashrails.run.SmoothRun;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Server → client: smoothed runs in the player's current dimension. {@code replace} means "this is
- * the full set" (join, dimension change); otherwise the runs are additions.
+ * Wire format of the two server-to-client messages, shared by every networking API generation
+ * (payload records on MC 1.20.5+, raw channel buffers before that).
  */
-public record RunsPayload(boolean replace, List<SmoothRun> runs) implements CustomPacketPayload {
+public final class RunWire {
 
-    public static final Type<RunsPayload> TYPE = new Type<>(SlashRails.id("runs"));
+    private RunWire() {
+    }
 
-    public static final StreamCodec<FriendlyByteBuf, RunsPayload> CODEC = StreamCodec.of(
-            (buf, p) -> {
-                buf.writeBoolean(p.replace);
-                buf.writeVarInt(p.runs.size());
-                for (SmoothRun run : p.runs) writeRun(buf, run);
-            },
-            buf -> {
-                boolean replace = buf.readBoolean();
-                int count = buf.readVarInt();
-                List<SmoothRun> runs = new ArrayList<>(count);
-                for (int i = 0; i < count; i++) runs.add(readRun(buf));
-                return new RunsPayload(replace, runs);
-            });
+    public static void writeRuns(FriendlyByteBuf buf, RunsPayload p) {
+        buf.writeBoolean(p.replace());
+        buf.writeVarInt(p.runs().size());
+        for (SmoothRun run : p.runs()) writeRun(buf, run);
+    }
 
-    @Override
-    public Type<? extends CustomPacketPayload> type() {
-        return TYPE;
+    public static RunsPayload readRuns(FriendlyByteBuf buf) {
+        boolean replace = buf.readBoolean();
+        int count = buf.readVarInt();
+        List<SmoothRun> runs = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) runs.add(readRun(buf));
+        return new RunsPayload(replace, runs);
+    }
+
+    public static void writeRemove(FriendlyByteBuf buf, RemoveRunPayload p) {
+        buf.writeVarInt(p.id());
+    }
+
+    public static RemoveRunPayload readRemove(FriendlyByteBuf buf) {
+        return new RemoveRunPayload(buf.readVarInt());
     }
 
     private static void writeRun(FriendlyByteBuf buf, SmoothRun run) {

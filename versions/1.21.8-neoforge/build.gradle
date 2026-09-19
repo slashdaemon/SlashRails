@@ -1,6 +1,6 @@
 plugins { id "net.neoforged.moddev" }
 ext.rails = [
-        compat : ["cart-behavior", "chunk-flags", "item-setid", "recipe-1212", "nbt-optional", "store-codec", "savedtype-string", "ids-factory", "sprite-atlasfn", "tooltip-display", "shot-scale", "perms-level", "lines-buffer"],
+        compat : ["cart-behavior", "chunk-flags", "item-setid", "recipe-1212", "nbt-optional", "store-codec", "savedtype-string", "ids-factory", "sprite-atlasfn", "tooltip-display", "shot-scale", "perms-level", "lines-buffer", "net-payload"],
         loader : ["cartext-rail", "model-blockstate", "overlay-afterparticles"],
         renames: ["getvalue"],
 ]
