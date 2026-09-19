@@ -34,12 +34,24 @@ public final class CurveFitter {
     private CurveFitter() {
     }
 
+    /** Tolerance for a rail with solid blocks around it: the curve stays on the vanilla line there. */
+    public static final double TIGHT = 0.005;
+
     /**
      * @param nodes  rails in travel order; consecutive rails must be adjacent and connected
      * @param closed true if the last rail connects back to the first
      */
     public static SmoothCurve fit(List<RailNode> nodes, boolean closed) {
+        return fit(nodes, closed, null);
+    }
+
+    /**
+     * @param tight per rail, true where the cart has no room to leave the vanilla line (a wall, a
+     *              tunnel, a lamp beside the track); null means every rail has room
+     */
+    public static SmoothCurve fit(List<RailNode> nodes, boolean closed, boolean[] tight) {
         validate(nodes, closed);
+        if (tight != null && tight.length != nodes.size()) throw new IllegalArgumentException("tight[] length");
         int n = nodes.size();
 
         Pt[] centres = new Pt[n];
@@ -70,12 +82,17 @@ public final class CurveFitter {
             anchors[i] = a.add(b).scale(0.5);
         }
 
-        Pt[] path = resample(edges, closed);
+        int[] railOf = new int[resampleCount(edges, closed)];
+        Pt[] path = resample(edges, closed, railOf);
+        double[] pathTol = new double[path.length];
+        for (int k = 0; k < path.length; k++) {
+            pathTol[k] = tight != null && tight[railOf[k]] ? TIGHT : TOLERANCE;
+        }
 
         if (closed) {
             double[] w = new double[path.length];
             java.util.Arrays.fill(w, 1.0);
-            Pt[] smoothed = smooth(path, w, true, path);
+            Pt[] smoothed = smooth(path, w, true, path, pathTol);
             return SmoothCurve.build(smoothed, null, null, true, centres, anchors);
         }
 
@@ -87,6 +104,8 @@ public final class CurveFitter {
         int m = p + 4;
         Pt[] target = new Pt[m];
         double[] w = new double[m];
+        double[] tol = new double[m];
+        System.arraycopy(pathTol, 0, tol, 2, p);
         target[0] = offset(path[0], startOut, 2 * SPACING);
         target[1] = offset(path[0], startOut, SPACING);
         for (int i = 0; i < p; i++) {
@@ -97,7 +116,7 @@ public final class CurveFitter {
         target[m - 1] = offset(path[p - 1], endOut, 2 * SPACING);
         w[0] = w[1] = w[2] = w[m - 3] = w[m - 2] = w[m - 1] = PINNED;
 
-        Pt[] smoothedAll = smooth(target, w, false, target);
+        Pt[] smoothedAll = smooth(target, w, false, target, tol);
         Pt[] ctrl = new Pt[p];
         System.arraycopy(smoothedAll, 2, ctrl, 0, p);
         Pt startTangent = new Pt(-startOut.dx, 0, -startOut.dz);
@@ -105,8 +124,19 @@ public final class CurveFitter {
         return SmoothCurve.build(ctrl, startTangent, endTangent, false, centres, anchors);
     }
 
-    /** Points every {@link #SPACING} blocks along a polyline, keeping both ends of an open one. */
-    private static Pt[] resample(Pt[] poly, boolean closed) {
+    private static int resampleCount(Pt[] poly, boolean closed) {
+        int segs = closed ? poly.length : poly.length - 1;
+        double total = 0;
+        for (int i = 0; i < segs; i++) total += poly[(i + 1) % poly.length].sub(poly[i]).length();
+        int count = Math.max(closed ? 4 : 2, (int) Math.round(total / SPACING));
+        return closed ? count : count + 1;
+    }
+
+    /**
+     * Points every {@link #SPACING} blocks along a polyline, keeping both ends of an open one.
+     * {@code railOf[k]} receives the polyline segment (= rail) each point lies on.
+     */
+    private static Pt[] resample(Pt[] poly, boolean closed, int[] railOf) {
         int segs = closed ? poly.length : poly.length - 1;
         double[] cum = new double[segs + 1];
         for (int i = 0; i < segs; i++) {
@@ -124,6 +154,7 @@ public final class CurveFitter {
             double f = segLen > 0 ? (s - cum[seg]) / segLen : 0;
             Pt a = poly[seg], b = poly[(seg + 1) % poly.length];
             out[k] = a.add(b.sub(a).scale(f));
+            railOf[k] = seg;
         }
         if (!closed) out[pts - 1] = poly[poly.length - 1];
         return out;
@@ -165,7 +196,7 @@ public final class CurveFitter {
      * with weight {@link #PINNED} meaning "fixed at target". Afterwards, points outside the tolerance
      * tube around {@code tube} are re-weighted and the system is re-solved.
      */
-    private static Pt[] smooth(Pt[] target, double[] w, boolean cyclic, Pt[] tube) {
+    private static Pt[] smooth(Pt[] target, double[] w, boolean cyclic, Pt[] tube, double[] tol) {
         int m = target.length;
         double[] tx = new double[m], tz = new double[m];
         for (int i = 0; i < m; i++) {
@@ -180,8 +211,8 @@ public final class CurveFitter {
             for (int i = 0; i < m; i++) {
                 if (w[i] == PINNED) continue;
                 double dx = x[i] - tube[i].x(), dz = z[i] - tube[i].z();
-                if (dx * dx + dz * dz > TOLERANCE * TOLERANCE) {
-                    w[i] *= 3.0;
+                if (dx * dx + dz * dz > tol[i] * tol[i]) {
+                    w[i] *= tol[i] < TOLERANCE ? 30.0 : 3.0;
                     outside = true;
                 }
             }
@@ -191,9 +222,9 @@ public final class CurveFitter {
         for (int i = 0; i < m; i++) {
             double dx = x[i] - tube[i].x(), dz = z[i] - tube[i].z();
             double d = Math.sqrt(dx * dx + dz * dz);
-            if (w[i] != PINNED && d > TOLERANCE) {
-                dx *= TOLERANCE / d;
-                dz *= TOLERANCE / d;
+            if (w[i] != PINNED && d > tol[i]) {
+                dx *= tol[i] / d;
+                dz *= tol[i] / d;
             }
             out[i] = new Pt(tube[i].x() + dx, target[i].y(), tube[i].z() + dz);
         }

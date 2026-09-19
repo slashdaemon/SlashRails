@@ -16,7 +16,10 @@ neoForge {
     }
     runs {
         client { client() }
-        server { server() }
+        server {
+            server()
+            programArgument "--nogui"
+        }
     }
     mods {
         slashtracks {

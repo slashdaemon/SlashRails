@@ -1,0 +1,16 @@
+{
+  "item.slashtracks.track_smoother": "Track Smoother",
+  "item.slashtracks.track_smoother.tooltip": "Use on a rail to smooth its curve. Use again to revert.",
+  "slashtracks.smoothed": "Smoothed %s rails",
+  "slashtracks.smoothed_loop": "Smoothed a loop of %s rails",
+  "slashtracks.tight": "(%s rails kept straight: blocks beside the track)",
+  "slashtracks.truncated": "(stopped at the %s-rail limit)",
+  "slashtracks.reverted": "Reverted %s rails to vanilla",
+  "slashtracks.op_only": "Only operators can use the Track Smoother on this server",
+  "slashtracks.fail.not_a_rail": "That isn't a rail",
+  "slashtracks.fail.sloped": "Sloped rails can't be smoothed yet — use it on a flat part of the track",
+  "slashtracks.fail.too_short": "Too few connected rails to smooth",
+  "slashtracks.fail.nothing_to_smooth": "This track is already straight",
+  "slashtracks.fail.fit": "Couldn't fit a curve to this track",
+  "slashtracks.missing_client": "This server uses SlashTracks. Install SlashTracks %s on your client to join."
+}

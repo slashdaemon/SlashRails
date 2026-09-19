@@ -11,6 +11,12 @@ base {
 loom {
     splitEnvironmentSourceSets()
 
+    runs {
+        server {
+            programArgs "--nogui"
+        }
+    }
+
     mods {
         slashtracks {
             sourceSet sourceSets.main

@@ -157,6 +157,27 @@ class CurveFitterTest {
         assertTrue(ms < 2000, "fitting " + c.railCount() + " rails took " + ms + " ms");
     }
 
+    @Test
+    void tightRailsKeepTheVanillaLine() {
+        // A wall beside part of the track: the curve must not leave those rails' vanilla line.
+        List<RailNode> rails = Tracks.open(Tracks.staircase(3, 6));
+        boolean[] tight = new boolean[rails.size()];
+        for (int i = 10; i < 16; i++) tight[i] = true;
+        SmoothCurve c = CurveFitter.fit(rails, false, tight);
+        for (int i = 10; i < 16; i++) {
+            Pt anchor = c.railAnchor(i);
+            double s = c.project(anchor.x(), anchor.y(), anchor.z(), Double.NaN, 0);
+            assertTrue(c.pointAt(s).horizontalDistance(anchor) <= 0.02,
+                    "tight rail " + i + " moved " + c.pointAt(s).horizontalDistance(anchor));
+        }
+        // Rails away from the wall are still smoothed.
+        SmoothCurve free = CurveFitter.fit(rails, false);
+        Pt a = c.railAnchor(rails.size() - 10);
+        double s1 = c.project(a.x(), a.y(), a.z(), Double.NaN, 0);
+        double s2 = free.project(a.x(), a.y(), a.z(), Double.NaN, 0);
+        assertEquals(free.pointAt(s2).horizontalDistance(a), c.pointAt(s1).horizontalDistance(a), 0.2);
+    }
+
     // ---- loops ----------------------------------------------------------------------------
 
     @Test

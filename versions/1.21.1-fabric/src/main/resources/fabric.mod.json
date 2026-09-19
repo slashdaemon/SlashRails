@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "slashtracks",
+  "version": "${version}",
+  "name": "SlashTracks",
+  "description": "Turns zigzag rail staircases into smooth curves: smooth to look at and smooth to ride in a vanilla minecart. Use the Track Smoother on a rail.",
+  "authors": ["Slash"],
+  "contact": {
+    "homepage": "https://theblock.academy"
+  },
+  "license": "ARR",
+  "icon": "assets/slashtracks/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.slashtracks.fabric.SlashTracksFabric"],
+    "client": ["com.slashtracks.fabric.client.SlashTracksFabricClient"]
+  },
+  "mixins": [
+    "slashtracks.mixins.json",
+    { "config": "slashtracks-client.mixins.json", "environment": "client" }
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
