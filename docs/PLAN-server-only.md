@@ -90,7 +90,8 @@ motion per tick (the vanilla zigzag is ~75–85°/tick on the same fixtures).
   Smoother.
 - Packet cost: `/slashrails-netstat` counts packets per second per type while a player watches
   a looping cart, every 3 ticks vs every tick.
-- Bedrock: a real Bedrock client through Geyser. There isn't one on this PC. The headless
+- Bedrock: a real Bedrock client through Geyser (TBS reset-26.2 uses the same Geyser/Floodgate
+  builds as the spike). There isn't one on this PC. The headless
   Bedrock client (bedrock-protocol, JS RakNet) can't finish a connection to Geyser, and its
   native RakNet needs a C++ toolchain that isn't installed.
 
