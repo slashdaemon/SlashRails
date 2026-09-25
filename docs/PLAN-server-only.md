@@ -144,8 +144,19 @@ Depends on: S1.
   marked required.
 - Found: AutoHost is **off** by default on a production server (Loom's dev run had it on). A
   server that wants textures for vanilla players must enable it (TBS does, via SlashSlabs' setup).
-- Track Smoother for vanilla clients: works (S0). Open: check the swing animation and sounds on
-  a vanilla client, and the no-pack fallback in-game.
+- Vanilla-client checks (26.2, stock client, subtitles on):
+  - With the pack: custom icon, name "Track Smoother", English tooltip. Using it plays the
+    sounds (subtitles "Anvil used" on smooth, "Block broken" on revert) and shows the action-bar
+    message.
+  - Without the pack (AutoHost off): plain stick model, name and tooltip in English (the name
+    needed an override of Polymer's final stack, `getPolymerItemStack`: Polymer rebuilds the name
+    from the translation key), action-bar text in English.
+  - The server logs which path each player takes ("joined without SlashRails: vanilla rails, no
+    run data" / "joined with SlashRails").
+  - **Open, cosmetic: the arm doesn't swing** when a vanilla player uses the tool. The client holds
+    a stick and predicts nothing. A server-side `swing(hand, true)` in `useOn` and Polymer's
+    `isPolymerBlockInteraction` hook both failed to animate it, though vanilla `/swing` does.
+    Server state at the call was `swinging=false`. Not investigated further.
 - Open, optional — tool preview for vanilla clients: particles along the run the tool would smooth,
   since they can't draw the overlay.
 - Done: `prodtest.py` checks server-only jars on a real Fabric server (AutoHost enabled and

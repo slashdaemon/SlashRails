@@ -33,12 +33,16 @@ public final class SlashRailsFabric implements ModInitializer {
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             if (!FabricNet.canSend(handler.player)) {
-                if (!VanillaClients.requireClientMod()) return; // server-only mode: vanilla rails, no payloads
+                if (!VanillaClients.requireClientMod()) { // server-only mode: vanilla rails, no payloads
+                    SlashRails.LOG.info("{} joined without SlashRails: vanilla rails, no run data", handler.player.getName().getString());
+                    return;
+                }
                 // Plain text: a client without the mod has no translation for it.
                 handler.disconnect(Component.literal("This server uses SlashRails. Install SlashRails "
                         + FabricPlatform.modVersion() + " on your client to join."));
                 return;
             }
+            SlashRails.LOG.info("{} joined with SlashRails", handler.player.getName().getString());
             RunService.sendSnapshot(handler.player);
         });
         ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, from, to) -> RunService.sendSnapshot(player));

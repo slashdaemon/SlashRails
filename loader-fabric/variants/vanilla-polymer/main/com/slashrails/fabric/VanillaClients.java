@@ -14,6 +14,7 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 
 /**
  * Server-only builds (Polymer): clients without SlashRails may join. They see the Track Smoother as a
@@ -37,15 +38,19 @@ final class VanillaClients {
             }
 
             @Override
+            public ItemStack getPolymerItemStack(ItemStack stack, TooltipFlag flag, PacketContext context, HolderLookup.Provider lookup) {
+                ItemStack out = PolymerItem.super.getPolymerItemStack(stack, flag, context, lookup);
+                // Polymer names the stack from the translation key; add the English fallback for clients without the pack.
+                if (!out.has(DataComponents.CUSTOM_NAME)) out.set(DataComponents.ITEM_NAME, Texts.tr("item.slashrails.track_smoother"));
+                return out;
+            }
+
+            @Override
             public Identifier getPolymerItemModel(ItemStack stack, PacketContext context, HolderLookup.Provider lookup) {
                 // Without the server pack the mod's model is missing: keep the stick's own model.
                 return PolymerResourcePackUtils.hasMainPack(context) ? PolymerItem.super.getPolymerItemModel(stack, context, lookup) : null;
             }
 
-            @Override
-            public void modifyBasePolymerItemStack(ItemStack out, ItemStack stack, PacketContext context, HolderLookup.Provider lookup) {
-                out.set(DataComponents.ITEM_NAME, Texts.tr("item.slashrails.track_smoother"));
-            }
         });
         PolymerResourcePackUtils.addModAssets(SlashRails.MOD_ID);
         if (Config.allowVanillaClients) {
