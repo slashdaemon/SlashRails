@@ -127,9 +127,9 @@ Depends on: nothing.
 - Client checks in §3. **Exit:** pass → S1; kill → stop, document.
 
 ### S1 — Decide the product shape
-Depends on: S0 pass, owner decisions D1–D4.
-- Keep one jar per band that runs either way, or ship a separate server-only artifact.
-- Choose the cart update policy (D3) and make it a config key, replacing the spike command.
+Depends on: S0 pass, owner decisions D1–D6 (decided, §7).
+- One jar for 26.2 Fabric with Polymer nested (D5); it runs with or without the mod on clients.
+- Cart update policy as a config key, default every tick (D3), replacing the spike command.
 - Remove the spike-only commands, trace and packet counter.
 
 ### S2 — Harden the 26.2 Fabric band
@@ -172,9 +172,11 @@ Depends on: S2.
 ### S5 — TBS integration
 Depends on: S3, the TBS reset on 26.2, owner go-ahead.
 - `TBS-server`: SlashRails jar (server-only), config, AutoHost settings shared with SlashSlabs.
-- `TBS-mod-strategy.md` / TBS `CLAUDE.md`: SlashRails listed as a Polymer-path server mod;
-  optional client install for curved visuals (a client-pack entry is possible because the mod is
-  harmless on a vanilla server — decide in D5).
+- `TBS-mod-strategy.md` / TBS `CLAUDE.md`: SlashRails listed as a Polymer-path server mod, and
+  (D6) as an optional TBS-client mod: amend the "StreamCraft is the only cross-side mod" contract
+  and pin the same SlashRails version in both packs, bumped together.
+- `TBS-client`: SlashRails entry (Modrinth-first per the client pack's policy; the Modrinth
+  listing must be public first).
 - LocalServer rehearsal with the TBS modset, then deploy only with explicit approval.
 
 ### S6 — Display-entity overlay (not built; see §6)
@@ -206,20 +208,19 @@ Goal: vanilla players see curved track (and optionally a cart model that follows
   - Visual mismatch: display entities don't take block light the same way as rails; seams at
     run ends; no powered-rail glow unless modelled per state.
 
-## 7. Decisions needed
+## 7. Decisions (decided 2026-09-24)
 
-- **D1 — Is the detached cart model acceptable for a first version?** Vanilla riders glide on the
-  curve while their cart model snaps to each rail up to ~0.5–0.9 blocks away and turns up to
-  ~50° (p95) off the direction of travel. Seen in-game (§3); the owner watched the ride live.
-- **D2 — If not acceptable:** build only the cart-model part of §6 (a virtual cart that follows
-  the curve, the real one hidden from vanilla clients). Turning smoothing off for vanilla riders
-  isn't possible: a cart and its path are shared by everyone watching.
-- **D3 — Cart update policy:** vanilla rate (every 3 ticks, rider turns in ~3× steps) or every
-  tick on smoothed runs (matches the ideal). Measured: ~10 extra small packets/s per cart per
-  watching player while on a curve (§3).
-- **D4 — Which bands get server-only mode:** 26.2 Fabric only (TBS), or every Fabric band.
-- **D5 — Packaging:** Polymer nested in every Fabric jar (bigger jar, Polymer loads on modded
-  clients too) vs a separate `-server` artifact vs Polymer as an optional dependency the server
-  already has (TBS gets it from SlashSlabs; fragile).
-- **D6 — TBS client pack:** offer SlashRails in TBS-client for curved visuals, or keep TBS
-  vanilla-looking for everyone.
+- **D1 — Snapping cart model on vanilla clients: acceptable for v1.** Vanilla riders glide on the
+  curve while the cart body snaps to each rail (up to ~0.5–0.9 blocks off, ~50° p95 yaw error).
+- **D2 — Display-entity overlay (§6): parked.** Nothing built; revisit after TBS players have used
+  v1. The costed write-up stays in §6.
+- **D3 — Cart updates: every tick on smoothed runs, as a config key** (`cartSyncTicks`, default 1;
+  3 = vanilla rate). Cost ~10 small packets/s per cart per watching player while on a curve.
+- **D4 — Bands: 26.2 Fabric only.** Other Fabric bands can be added later with the `polymer` flag,
+  each needing its own Polymer build and a vanilla-client test (S4).
+- **D5 — Packaging: Polymer nested in the server-only jars** (polymer-core, polymer-resource-pack,
+  polymer-autohost), as SlashSlabs does. Jar ~1 MB; Polymer also loads on modded clients
+  (tested harmless).
+- **D6 — TBS client pack: yes, SlashRails optional in TBS-client** for curved visuals. Needs a
+  TBS contract change (StreamCraft is today the only mod in both packs) and lockstep client/server
+  jar versions, like StreamCraft. Folded into S5.
