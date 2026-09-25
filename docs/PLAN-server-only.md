@@ -89,13 +89,13 @@ motion per tick (the vanilla zigzag is ~75–85°/tick on the same fixtures).
   translations come from the pack.
 - **What vanilla players see:** the original zigzag rails, as intended. Smoothing shows only in
   how carts move. Riding (third person, every 3 ticks and every tick): the rider follows the
-  curve; the cart body snaps to each rail block's line and flips between straight and 45� as it
-  crosses rails, as �2 predicted. The owner watched this live; see D1.
+  curve; the cart body snaps to each rail block's line and flips between straight and 45° as it
+  crosses rails, as §2 predicted. The owner watched this live; see D1.
 - **Modded 26.2 client** (Fabric 0.19.5, Fabric API 0.159, spike jar) on the same server: Polymer
   handshake ("Full sync"), smoothed loop drawn as curves, cart body and rider both follow the
   curve. Same as today.
 - **Packet cost of every-tick updates** (`/slashrails-netstat`, one cart on the loop, one watching
-  player, 10�12 s windows; counts include every tracked entity): entity-move packets
+  player, 10–12 s windows; counts include every tracked entity): entity-move packets
   (`move_entity_pos` + `_pos_rot` + `entity_position_sync`) went from about 30/s to about 40/s.
   That is ~10 extra small packets per second per cart per watcher while on a curve, ~150 B/s.
 - **Bedrock:** not verified with a client. Geyser/Floodgate (the builds on the TBS reset-26.2
@@ -153,6 +153,17 @@ Depends on: S2; SlashSlabs on the same server.
 - Polymer version alignment: both jars nest Polymer; Fabric Loader keeps the newest nested copy.
   Pin both to the same Polymer build for TBS.
 
+### S3b — Bedrock (Geyser)
+Depends on: S2; the TBS reset-26.2 pack (Geyser 2.11.3-b1246, Floodgate 2.2.6-b67 — the same builds
+the spike loaded).
+- Real Bedrock client through Geyser: join, hold the Track Smoother, use it on a rail, ride a
+  smoothed run. Bedrock never registers the SlashRails channel, so it gets no payloads; carts
+  arrive as ordinary entity moves. Bedrock renders its own cart model, so it may not snap to the
+  rails the way the Java model does. Check in-game.
+- Add a Rainbow-generated Geyser item mapping for the Track Smoother, built alongside SlashSlabs'
+  mappings, so Bedrock players see its texture instead of a stick. SlashRails has no custom
+  blocks, so it needs no block mappings.
+
 ### S4 — Other bands (only if wanted, D4)
 Depends on: S2.
 - Fabric bands with a Polymer build for their MC version. Polymer exists for Fabric only, so
@@ -199,13 +210,13 @@ Goal: vanilla players see curved track (and optionally a cart model that follows
 
 - **D1 — Is the detached cart model acceptable for a first version?** Vanilla riders glide on the
   curve while their cart model snaps to each rail up to ~0.5–0.9 blocks away and turns up to
-  ~50° (p95) off the direction of travel. Needs an in-game look (§3 pending).
-- **D2 — If not acceptable:** accept a vanilla ride where the rider also snaps (i.e. don't smooth
-  for vanilla riders — not possible per player, the cart is shared), or fund the §6 cart-model
-  part only.
+  ~50° (p95) off the direction of travel. Seen in-game (§3); the owner watched the ride live.
+- **D2 — If not acceptable:** build only the cart-model part of §6 (a virtual cart that follows
+  the curve, the real one hidden from vanilla clients). Turning smoothing off for vanilla riders
+  isn't possible: a cart and its path are shared by everyone watching.
 - **D3 — Cart update policy:** vanilla rate (every 3 ticks, rider turns in ~3× steps) or every
   tick on smoothed runs (matches the ideal). Measured: ~10 extra small packets/s per cart per
-  watching player while on a curve (�3).
+  watching player while on a curve (§3).
 - **D4 — Which bands get server-only mode:** 26.2 Fabric only (TBS), or every Fabric band.
 - **D5 — Packaging:** Polymer nested in every Fabric jar (bigger jar, Polymer loads on modded
   clients too) vs a separate `-server` artifact vs Polymer as an optional dependency the server
