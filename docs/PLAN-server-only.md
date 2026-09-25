@@ -126,32 +126,42 @@ Depends on: nothing.
   `/slashrails-netstat [reset]`, `scripts/spike_client_model.py`.
 - Client checks in §3. **Exit:** pass → S1; kill → stop, document.
 
-### S1 — Decide the product shape
+### S1 — Decide the product shape  *(done)*
 Depends on: S0 pass, owner decisions D1–D6 (decided, §7).
 - One jar for 26.2 Fabric with Polymer nested (D5); it runs with or without the mod on clients.
 - Cart update policy as a config key, default every tick (D3), replacing the spike command.
 - Remove the spike-only commands, trace and packet counter.
+- Done: `allowVanillaClients` (default true) and `cartSyncTicks` (default 1) in
+  `config/slashrails.properties`, written only by builds that support vanilla clients.
 
-### S2 — Harden the 26.2 Fabric band
+### S2 — Harden the 26.2 Fabric band  *(done except the items marked open)*
 Depends on: S1.
 - Config: `serverOnlyMode` (allow vanilla clients) and `cartSyncTicks`.
-- Chat/tooltip text for vanilla clients: rely on the pack's lang, or send literal text when a
-  client has no pack.
-- Track Smoother for vanilla clients: right-click on a rail with a stick representation (no
-  client prediction). Check the swing animation and sounds.
-- Tool preview for vanilla clients (optional): particles along the run the tool would smooth,
+- Done: every SlashRails text carries its English string as fallback (`Texts.tr`, from the
+  mod's `en_us.json`), and a client without the server pack keeps the stick's own model
+  (`PolymerResourcePackUtils.hasMainPack`), so a server without AutoHost degrades to readable
+  English instead of raw keys and a missing-model cube. With vanilla clients allowed the pack is
+  marked required.
+- Found: AutoHost is **off** by default on a production server (Loom's dev run had it on). A
+  server that wants textures for vanilla players must enable it (TBS does, via SlashSlabs' setup).
+- Track Smoother for vanilla clients: works (S0). Open: check the swing animation and sounds on
+  a vanilla client, and the no-pack fallback in-game.
+- Open, optional — tool preview for vanilla clients: particles along the run the tool would smooth,
   since they can't draw the overlay.
-- Server-only mode also on dedicated servers without the mod on any client: prodtest target
-  that joins no client but asserts the join gate and pack contents.
-- `prodtest.py` gains a Polymer target (shipped jar on a real Fabric server, AutoHost pack built,
-  self-test PASS), like SlashSlabs'.
+- Done: `prodtest.py` checks server-only jars on a real Fabric server (AutoHost enabled and
+  required, as TBS runs it): self-test, the server-only log line, and the generated pack holding
+  SlashRails' item definition, model, texture and lang. `--jar` tests an unreleased build.
+  Result: `SELFTEST PASSED 13/13, server-only OK`.
 
-### S3 — Shared pack with SlashSlabs
+### S3 — Shared pack with SlashSlabs  *(done)*
 Depends on: S2; SlashSlabs on the same server.
 - Both mods add assets to Polymer's one generated pack; check the merged pack on a server running
   both (no namespace collisions: `slashrails:*` vs `slashslabs:*`), and one AutoHost config.
 - Polymer version alignment: both jars nest Polymer; Fabric Loader keeps the newest nested copy.
   Pin both to the same Polymer build for TBS.
+- Done: prodtest server with SlashSlabs 0.2.1 (26.2) beside the SlashRails jar, both nesting
+  Polymer 0.17.5+26.2. One pack: `slashrails` 12 files + `slashslabs` 51; SlashRails self-test
+  13/13, server-only OK.
 
 ### S3b — Bedrock (Geyser)
 Depends on: S2; the TBS reset-26.2 pack (Geyser 2.11.3-b1246, Floodgate 2.2.6-b67 — the same builds

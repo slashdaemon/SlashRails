@@ -104,7 +104,7 @@ checkout before `--offline` works.
 ```bash
 export JAVA_HOME="/c/Users/slash/AppData/Roaming/PrismLauncher/java/java-runtime-delta"
 ./gradlew buildAll                          # core tests + all 28 jars -> build/release/
-./gradlew :versions:1.21.5-fabric:build     # one band
+./gradlew :versions:1.21.5-fabric:build     # one band (-PnoRelease: don't copy into build/release/)
 ./gradlew build263                          # one nested 26.x build (both loaders)
 scripts/selftest.sh 1.21.5-fabric           # dev server + /slashrails selftest over RCON
 scripts/selftest.sh 26.2-neoforge           # nested bands work the same way
@@ -128,7 +128,8 @@ jar from `build/release/` on a real server built by the loader's own launcher/in
 server launcher + Fabric API; NeoForge/Forge installers; the Forge jar again on NeoForge 1.20.1) and
 drives `/slashrails selftest` over RCON (ports 25596/25597, servers kept in `build/prodtest/`). Dev
 runs are Mojang-named; production is intermediary (Fabric) or SRG (Forge 1.20.1), so only this
-catches a broken refmap. A full run takes about two hours; it needs no Gradle, so client tests can
+catches a broken refmap. A jar that nests Polymer is also checked for server-only mode (log line,
+AutoHost pack contents); `--jar <path>` tests an unreleased build for one target. A full run takes about two hours; it needs no Gradle, so client tests can
 run beside it.
 
 `scripts/visualtest.sh <band> [world]` (**opens a client window — ask first**) copies the band's
@@ -194,7 +195,16 @@ The Forge jar is tagged Forge + NeoForge.
 
 ## Scope
 
-Flat runs only (runs stop at slopes), opt-in tool, mod required on both sides. NeoForge 26.1+
+Flat runs only (runs stop at slopes), opt-in tool, mod required on both sides — except
+**server-only builds** (branch `server-only`, 26.2 Fabric only; plan and decisions:
+`docs/PLAN-server-only.md`). A band with `polymer: true` in `ext.rails` gets the `vanilla-polymer`
+loader variant (others get `vanilla-required`) and nests Polymer core/resource-pack/AutoHost:
+clients without the mod may join (`allowVanillaClients`), see the Track Smoother as a stick with
+the mod's model from Polymer's pack, get no payloads, see vanilla rails, and ride the curve (the
+vanilla cart *model* still snaps to each rail — the vanilla renderer projects it onto the rail
+block). `cartSyncTicks` (default 1) sends smoothed-run carts' positions every tick. AutoHost is
+off by default on a production server; without the pack, text falls back to English and the item
+to the plain stick. NeoForge 26.1+
 removed the rail-pass and rail-speed hooks, so modded rails' custom behaviour does not apply on
 smoothed runs there. Later: slope smoothing, per-chunk sync, camera follow.
 
