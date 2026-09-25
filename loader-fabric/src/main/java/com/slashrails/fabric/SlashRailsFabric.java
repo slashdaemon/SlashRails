@@ -29,9 +29,11 @@ public final class SlashRailsFabric implements ModInitializer {
                 .register(entries -> entries.accept(ModItems.trackSmoother));
 
         FabricNet.register();
+        VanillaClients.init();
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             if (!FabricNet.canSend(handler.player)) {
+                if (!VanillaClients.requireClientMod()) return; // server-only mode: vanilla rails, no payloads
                 // Plain text: a client without the mod has no translation for it.
                 handler.disconnect(Component.literal("This server uses SlashRails. Install SlashRails "
                         + FabricPlatform.modVersion() + " on your client to join."));

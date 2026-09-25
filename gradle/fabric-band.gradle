@@ -7,6 +7,9 @@
 // See gradle/band-sources.gradle for what the variant lists mean.
 
 ext.railsLoader = "fabric"
+// Server-only mode (rails.polymer): clients without the mod may join, via Polymer. Every other band
+// requires the mod on the client. The variant is picked here so band files only set the flag.
+project.rails.loader = (project.rails.loader ?: []) + [project.rails.polymer ? "vanilla-polymer" : "vanilla-required"]
 // The repo root. A nested 26.x build (versions/26.x/) passes it as -PrailsRoot / gradle.properties.
 ext.railsRootDir = project.hasProperty("railsRoot") ? rootProject.file(project.railsRoot) : rootProject.projectDir
 apply from: new File(project.railsRootDir, "gradle/band-sources.gradle")
@@ -69,6 +72,7 @@ loom {
 }
 
 repositories {
+    maven { name = "Nucleoid"; url = "https://maven.nucleoid.xyz/"; content { includeGroup "eu.pb4" } }
     maven {
         name = "Modrinth"
         url = "https://api.modrinth.com/maven"
@@ -87,6 +91,14 @@ dependencies {
     if (!unobf) mappings loom.officialMojangMappings()
     add(modImpl, "net.fabricmc:fabric-loader:${project.loader_version}")
     add(modImpl, "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}")
+
+    if (project.rails.polymer) {
+        // Nested, like SlashSlabs: core (item overlay), resource pack (mod assets), AutoHost (serves the pack).
+        ["polymer-core", "polymer-resource-pack", "polymer-autohost"].each {
+            add(modImpl, "eu.pb4:${it}:${project.polymer_version}")
+            include "eu.pb4:${it}:${project.polymer_version}"
+        }
+    }
 
     // Compatibility testing only, never bundled: -Psodium=<version> [-Piris=<version>]
     // e.g. -Psodium=mc1.21.1-0.6.13-fabric -Piris=1.8.8+1.21.1-fabric
@@ -123,6 +135,7 @@ jar {
 // Every band's shipping jar is copied to build/release/ so there is one place to look.
 tasks.named(unobf ? "jar" : "remapJar").configure { t ->
     t.doLast {
+        if (project.hasProperty("noRelease")) return // -PnoRelease: experiments stay out of build/release
         def releaseDir = new File(project.railsRootDir, "build/release")
         releaseDir.mkdirs()
         def jar = t.archiveFile.get().asFile

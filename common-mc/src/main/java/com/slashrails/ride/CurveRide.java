@@ -186,6 +186,7 @@ public final class CurveRide {
 
         if (leaving) ride.slashrails$set(0, Double.NaN, sign);
         else ride.slashrails$set(run.id(), curve.normalize(s2), sign);
+        Platform.get().onCurveStep(cart);
         return true;
     }
 

@@ -3,5 +3,6 @@ ext.rails = [
         compat : ["cart-behavior", "chunk-flags", "item-setid", "recipe-1212", "nbt-optional", "store-codec", "savedtype-id", "ids-factory", "sprite-atlasmanager", "tooltip-display", "shot-scale", "perms-set", "lines-gizmo", "net-payload"],
         loader : ["model-blockstate", "overlay-none", "net-payload"],
         renames: ["getvalue", "ride3", "mc1211", "mc261", "fabric261", "mc262"],
+        polymer: true,
 ]
 apply from: "${rootDir}/../../gradle/fabric-band.gradle"

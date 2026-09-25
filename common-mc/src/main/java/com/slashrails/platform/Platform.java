@@ -26,6 +26,10 @@ public interface Platform {
     /** Loader hook fired as a cart passes over a rail (NeoForge {@code onMinecartPass}; no-op on Fabric). */
     void onMinecartPass(BlockState rail, Level level, BlockPos pos, AbstractMinecart cart);
 
+    /** A cart on a smoothed run was moved along its curve this tick (server). */
+    default void onCurveStep(AbstractMinecart cart) {
+    }
+
     /** Activator rails share {@code PoweredRailBlock} with powered rails (NeoForge lets mods add more). */
     boolean isActivatorRail(BlockState rail);
 

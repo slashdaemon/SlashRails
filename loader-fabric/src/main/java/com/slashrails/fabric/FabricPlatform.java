@@ -46,6 +46,11 @@ final class FabricPlatform implements Platform {
     }
 
     @Override
+    public void onCurveStep(AbstractMinecart cart) {
+        VanillaClients.onCurveStep(cart);
+    }
+
+    @Override
     public boolean isActivatorRail(BlockState rail) {
         return rail.is(net.minecraft.world.level.block.Blocks.ACTIVATOR_RAIL);
     }
