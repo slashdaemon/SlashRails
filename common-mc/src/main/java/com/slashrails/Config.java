@@ -23,6 +23,10 @@ public final class Config {
     public static boolean debugOverlay = false;
     /** Client: preview the run the Track Smoother would smooth while holding it. */
     public static boolean toolPreview = true;
+    /** Server, server-only builds: let clients without SlashRails join (they see vanilla rails). */
+    public static boolean allowVanillaClients = true;
+    /** Server, server-only builds: send smoothed-run carts' positions every N ticks (1-3; vanilla: 3). */
+    public static int cartSyncTicks = 1;
 
     private Config() {
     }
@@ -41,15 +45,24 @@ public final class Config {
         opOnlyTool = boolOf(p, "opOnlyTool", opOnlyTool);
         debugOverlay = boolOf(p, "debugOverlay", debugOverlay);
         toolPreview = boolOf(p, "toolPreview", toolPreview);
+        boolean serverOnly = Platform.get().supportsVanillaClients();
+        if (serverOnly) {
+            allowVanillaClients = boolOf(p, "allowVanillaClients", allowVanillaClients);
+            cartSyncTicks = Math.max(1, Math.min(3, intOf(p, "cartSyncTicks", cartSyncTicks)));
+        }
 
         p.setProperty("maxRunLength", Integer.toString(maxRunLength));
         p.setProperty("opOnlyTool", Boolean.toString(opOnlyTool));
         p.setProperty("debugOverlay", Boolean.toString(debugOverlay));
         p.setProperty("toolPreview", Boolean.toString(toolPreview));
+        if (serverOnly) {
+            p.setProperty("allowVanillaClients", Boolean.toString(allowVanillaClients));
+            p.setProperty("cartSyncTicks", Integer.toString(cartSyncTicks));
+        }
         try {
             Files.createDirectories(file.getParent());
             try (Writer w = Files.newBufferedWriter(file)) {
-                p.store(w, "SlashRails. maxRunLength/opOnlyTool: server. debugOverlay/toolPreview: client.");
+                p.store(w, "SlashRails. maxRunLength/opOnlyTool/allowVanillaClients/cartSyncTicks: server. debugOverlay/toolPreview: client.");
             }
         } catch (IOException e) {
             SlashRails.LOG.warn("Could not write {}", file, e);

@@ -21,6 +21,6 @@ abstract class TooltipItem extends Item {
     @Override
     @SuppressWarnings("deprecation")
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag flag) {
-        tooltip.accept(Component.translatable(tooltipKey));
+        tooltip.accept(com.slashrails.Texts.tr(tooltipKey));
     }
 }

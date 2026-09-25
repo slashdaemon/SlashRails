@@ -8,6 +8,10 @@ refmap or a remapping problem.
     python scripts/prodtest.py --all                 # every jar in build/release
     python scripts/prodtest.py 1.21.5-fabric 1.20.1-forge 1.20.1-neoforge
     python scripts/prodtest.py --list
+    python scripts/prodtest.py 26.2-fabric --jar path/to/slashrails-<v>+mc26.2-fabric.jar   # an unreleased jar
+
+A jar that nests Polymer (a server-only build) is also checked for server-only mode: the log line,
+and Polymer's generated pack holding SlashRails' item model, texture and lang.
 
 Targets are <band>-<loader> as in the jar names, plus "1.20.1-neoforge" (the Forge jar on NeoForge
 1.20.1). Servers live in build/prodtest/<target>/ and are reused between runs. Runtimes: JDK 17 for
@@ -29,6 +33,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -40,6 +45,9 @@ FABRIC_INSTALLER = "1.1.0"
 FORGE_1201 = "1.20.1-47.4.23"
 NEOFORGE_1201 = "1.20.1-47.1.106"
 PRISM_JAVA = Path.home() / "AppData/Roaming/PrismLauncher/java"
+JAR_OVERRIDE: Path | None = None  # --jar
+PACK_ASSETS = ["assets/slashrails/items/track_smoother.json", "assets/slashrails/models/item/track_smoother.json",
+               "assets/slashrails/textures/item/track_smoother.png", "assets/slashrails/lang/en_us.json"]
 UA = {"User-Agent": "slashdaemon/SlashRails prodtest"}
 
 
@@ -77,6 +85,8 @@ def download(url: str, dest: Path) -> Path:
 
 
 def jar_for(band: str, loader: str) -> Path:
+    if JAR_OVERRIDE is not None:
+        return JAR_OVERRIDE
     found = sorted(RELEASE.glob(f"slashrails-*+mc{band}-{loader}.jar"), key=lambda p: p.stat().st_mtime)
     if not found:
         raise RuntimeError(f"no jar for {band}-{loader} in build/release; run ./gradlew buildAll")
@@ -171,8 +181,32 @@ FATAL = re.compile(r"Mixin apply .* failed|MixinApplyError|InvalidInjectionExcep
                    r"Failed to load|requires .* but only", re.I)
 
 
+def is_server_only(jar: Path) -> bool:
+    with zipfile.ZipFile(jar) as z:
+        return any(n.startswith("META-INF/jars/polymer-core") for n in z.namelist())
+
+
+def check_server_only(run: Path, log: str) -> str | None:
+    """None if server-only mode came up with a complete pack, else what is wrong."""
+    if "clients without the mod may join" not in log:
+        return "no server-only log line"
+    pack = run / "polymer" / "resource_pack.zip"
+    if not pack.exists():
+        return "polymer/resource_pack.zip not generated"
+    with zipfile.ZipFile(pack) as z:
+        missing = [a for a in PACK_ASSETS if a not in z.namelist()]
+    return f"pack lacks {', '.join(missing)}" if missing else None
+
+
 def run_target(target: str) -> str:
     run, cmd = install(target)
+    band, loader = target.rsplit("-", 1)
+    server_only = loader == "fabric" and is_server_only(jar_for(band, loader))
+    shutil.rmtree(run / "polymer", ignore_errors=True)
+    if server_only:  # as deployed (TBS): AutoHost serves the required pack; Polymer fills in the other keys
+        cfg = run / "config" / "polymer" / "auto-host.json"
+        cfg.parent.mkdir(parents=True, exist_ok=True)
+        cfg.write_text('{"enabled": true, "required": true, "type": "polymer:automatic"}\n', encoding="utf-8")
     configure(run)
     log_path = run / "prodtest-console.log"
     with open(log_path, "w", encoding="utf-8", errors="replace") as out:
@@ -195,6 +229,9 @@ def run_target(target: str) -> str:
             text = log_path.read_text(encoding="utf-8", errors="replace")
             m = re.search(r"SELFTEST (PASSED|FAILED) [0-9/]+", text)
             if m:
+                if server_only and m.group(1) == "PASSED":
+                    problem = check_server_only(run, text)
+                    return f"{m.group(0)}, server-only " + (f"FAILED ({problem})" if problem else "OK")
                 return m.group(0)
             bad = FATAL.search(text)
             if bad or proc.poll() is not None:
@@ -217,7 +254,13 @@ def main() -> int:
     ap.add_argument("targets", nargs="*")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--list", action="store_true")
+    ap.add_argument("--jar", type=Path, help="test this jar instead of build/release's (one target only)")
     a = ap.parse_args()
+    global JAR_OVERRIDE
+    if a.jar:
+        if len(a.targets) != 1 or a.all:
+            ap.error("--jar needs exactly one named target")
+        JAR_OVERRIDE = a.jar.resolve()
     available = targets()
     if a.list:
         print("\n".join(available))
@@ -233,7 +276,7 @@ def main() -> int:
         except Exception as e:  # noqa: BLE001 - report and continue with the next target
             result = f"ERROR {e}"
         print(f"{t}: {result}", flush=True)
-        failed += not result.startswith("SELFTEST PASSED")
+        failed += not result.startswith("SELFTEST PASSED") or "FAILED" in result
     print(f"{len(chosen) - failed}/{len(chosen)} passed")
     return 1 if failed else 0
 

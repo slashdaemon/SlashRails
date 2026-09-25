@@ -46,6 +46,11 @@ final class FabricPlatform implements Platform {
     }
 
     @Override
+    public boolean supportsVanillaClients() {
+        return VanillaClients.SUPPORTED;
+    }
+
+    @Override
     public void onCurveStep(AbstractMinecart cart) {
         VanillaClients.onCurveStep(cart);
     }

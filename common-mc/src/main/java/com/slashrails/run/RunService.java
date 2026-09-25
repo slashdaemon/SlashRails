@@ -38,7 +38,7 @@ public final class RunService {
         SmoothRunRegistry registry = SmoothRunRegistry.get(level);
         RunDetector.Result r = RunDetector.detect(level, clicked, Config.maxRunLength, registry::contains);
         if (!r.ok()) {
-            return Component.translatable("slashrails.fail." + r.failure().name().toLowerCase(Locale.ROOT));
+            return com.slashrails.Texts.tr("slashrails.fail." + r.failure().name().toLowerCase(Locale.ROOT));
         }
         SmoothRun run;
         try {
@@ -46,17 +46,17 @@ public final class RunService {
             run.curve();
         } catch (RuntimeException e) {
             SlashRails.LOG.error("Could not fit a curve over the run at {}", clicked, e);
-            return Component.translatable("slashrails.fail.fit");
+            return com.slashrails.Texts.tr("slashrails.fail.fit");
         }
         RunsPayload added = new RunsPayload(false, List.of(run));
         broadcast(level, p -> Platform.get().sendRuns(p, added));
-        Component msg = Component.translatable(r.closed() ? "slashrails.smoothed_loop" : "slashrails.smoothed", run.size());
+        Component msg = com.slashrails.Texts.tr(r.closed() ? "slashrails.smoothed_loop" : "slashrails.smoothed", run.size());
         int tight = run.tightCount();
         if (tight > 0) {
-            msg = msg.copy().append(" ").append(Component.translatable("slashrails.tight", tight));
+            msg = msg.copy().append(" ").append(com.slashrails.Texts.tr("slashrails.tight", tight));
         }
         if (r.truncated()) {
-            msg = msg.copy().append(" ").append(Component.translatable("slashrails.truncated", Config.maxRunLength));
+            msg = msg.copy().append(" ").append(com.slashrails.Texts.tr("slashrails.truncated", Config.maxRunLength));
         }
         return msg;
     }

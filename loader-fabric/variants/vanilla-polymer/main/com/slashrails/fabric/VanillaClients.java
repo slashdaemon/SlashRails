@@ -1,81 +1,67 @@
 package com.slashrails.fabric;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.slashrails.Config;
 import com.slashrails.SlashRails;
+import com.slashrails.Texts;
 import com.slashrails.item.ModItems;
 import eu.pb4.polymer.core.api.item.PolymerItem;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
-import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * Server-only mode (Polymer): clients without SlashRails may join. They see the Track Smoother as a
- * vanilla item carrying the mod's item model (served in the Polymer resource pack), never receive a
+ * Server-only builds (Polymer): clients without SlashRails may join. They see the Track Smoother as a
+ * vanilla item carrying the mod's item model (served in Polymer's resource pack), never receive a
  * SlashRails registry entry or payload, and see the vanilla rails while carts follow the curve.
+ * Clients with the mod keep the full experience.
  */
 final class VanillaClients {
 
-    /** Send smoothed-run carts' positions every N ticks (vanilla minecarts: every 3). */
-    static int cartSyncTicks = Integer.getInteger("slashrails.cartSyncTicks", 3);
+    static final boolean SUPPORTED = true;
 
     private VanillaClients() {
     }
 
     static void init() {
+        // Every client gets the vanilla representation; modded clients also have the model locally.
         PolymerItem.registerOverlay(ModItems.trackSmoother, new PolymerItem() {
             @Override
             public Item getPolymerItem(ItemStack stack, PacketContext context) {
                 return Items.STICK;
             }
+
+            @Override
+            public Identifier getPolymerItemModel(ItemStack stack, PacketContext context, HolderLookup.Provider lookup) {
+                // Without the server pack the mod's model is missing: keep the stick's own model.
+                return PolymerResourcePackUtils.hasMainPack(context) ? PolymerItem.super.getPolymerItemModel(stack, context, lookup) : null;
+            }
+
+            @Override
+            public void modifyBasePolymerItemStack(ItemStack out, ItemStack stack, PacketContext context, HolderLookup.Provider lookup) {
+                out.set(DataComponents.ITEM_NAME, Texts.tr("item.slashrails.track_smoother"));
+            }
         });
         PolymerResourcePackUtils.addModAssets(SlashRails.MOD_ID);
-        // Spike-only knob for measuring vanilla-client smoothness against update rate.
-        CommandRegistrationCallback.EVENT.register((dispatcher, registries, env) -> dispatcher.register(
-                Commands.literal("slashrails-cartsync")
-                        .requires(com.slashrails.Perms::isGamemaster)
-                        .then(Commands.argument("ticks", IntegerArgumentType.integer(1, 3)).executes(c -> {
-                            cartSyncTicks = IntegerArgumentType.getInteger(c, "ticks");
-                            c.getSource().sendSuccess(() -> Component.literal("cartSyncTicks=" + cartSyncTicks), true);
-                            return cartSyncTicks;
-                        }))));
-        CommandRegistrationCallback.EVENT.register((dispatcher, registries, env) -> dispatcher.register(
-                Commands.literal("slashrails-trace")
-                        .requires(com.slashrails.Perms::isGamemaster)
-                        .then(Commands.argument("ticks", IntegerArgumentType.integer(1, 72000)).executes(c -> {
-                            String msg = SpikeTrace.start(c.getSource().getServer(), IntegerArgumentType.getInteger(c, "ticks"));
-                            c.getSource().sendSuccess(() -> Component.literal(msg), true);
-                            return 1;
-                        }))));
-        CommandRegistrationCallback.EVENT.register((dispatcher, registries, env) -> dispatcher.register(
-                Commands.literal("slashrails-netstat")
-                        .requires(com.slashrails.Perms::isGamemaster)
-                        .executes(c -> {
-                            String msg = SpikeNetStat.show();
-                            c.getSource().sendSuccess(() -> Component.literal(msg), false);
-                            return 1;
-                        })
-                        .then(Commands.literal("reset").executes(c -> {
-                            SpikeNetStat.reset();
-                            c.getSource().sendSuccess(() -> Component.literal("reset"), false);
-                            return 1;
-                        }))));
-        SpikeTrace.register();
-        SlashRails.LOG.info("SlashRails server-only mode: clients without the mod may join (Polymer)");
+        if (Config.allowVanillaClients) {
+            // Without the pack a vanilla client would see a missing model and raw translation keys.
+            PolymerResourcePackUtils.markAsRequired();
+            SlashRails.LOG.info("SlashRails: clients without the mod may join (Polymer); cart updates every {} tick(s)", Config.cartSyncTicks);
+        }
     }
 
     static boolean requireClientMod() {
-        return false;
+        return !Config.allowVanillaClients;
     }
 
-    /** A cart on a smoothed run moved this tick (server). */
+    /** A cart on a smoothed run moved this tick (server). Vanilla minecarts send positions every 3 ticks. */
     static void onCurveStep(AbstractMinecart cart) {
         // syncPosition makes ServerEntity send the position this tick (needsSync would add a motion packet).
-        if (cartSyncTicks < 3 && cart.tickCount % cartSyncTicks == 0) cart.syncPosition = true;
+        if (Config.cartSyncTicks < 3 && cart.tickCount % Config.cartSyncTicks == 0) cart.syncPosition = true;
     }
 }

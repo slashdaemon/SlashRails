@@ -29,13 +29,13 @@ public class TrackSmootherItem extends TooltipItem {
         }
         Player player = ctx.getPlayer();
         if (player != null && Config.opOnlyTool && !com.slashrails.Perms.isGamemaster(player)) {
-            player.displayClientMessage(Component.translatable("slashrails.op_only"), true);
+            player.displayClientMessage(com.slashrails.Texts.tr("slashrails.op_only"), true);
             return InteractionResult.FAIL;
         }
         Component msg;
         if (SmoothRunRegistry.get(level).contains(ctx.getClickedPos())) {
             int n = RunService.revert(level, ctx.getClickedPos());
-            msg = Component.translatable("slashrails.reverted", n);
+            msg = com.slashrails.Texts.tr("slashrails.reverted", n);
             level.playSound(null, ctx.getClickedPos(), SoundEvents.CHAIN_BREAK, SoundSource.BLOCKS, 0.8f, 1.2f);
         } else {
             msg = RunService.smooth(level, ctx.getClickedPos());
