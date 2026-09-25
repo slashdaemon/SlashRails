@@ -81,19 +81,30 @@ motion per tick (the vanilla zigzag is ~75–85°/tick on the same fixtures).
 - The model offset and yaw error do not depend on the update rate: they come from the renderer
   snapping to rails.
 
-### Visual and join checks with real clients — PENDING (needs owner OK to open client windows)
-- Stock vanilla 26.2 (Prism `SlashRails-Vanilla-26.2`, created): joins with the required pack;
-  Track Smoother shows its texture and name; using it smooths a run; riding a smoothed staircase
-  and the r=4 arc at every-3 and every-tick updates; how bad the detached cart model looks.
-- Modded 26.2 client (Prism `SlashRails-Fabric-26.2`, created: Fabric 0.19.5 + Fabric API +
-  the spike jar): sees the curves and the tool preview, rides as today, holds a working Track
-  Smoother.
-- Packet cost: `/slashrails-netstat` counts packets per second per type while a player watches
-  a looping cart, every 3 ticks vs every tick.
-- Bedrock: a real Bedrock client through Geyser (TBS reset-26.2 uses the same Geyser/Floodgate
-  builds as the spike). There isn't one on this PC. The headless
-  Bedrock client (bedrock-protocol, JS RakNet) can't finish a connection to Geyser, and its
-  native RakNet needs a C++ toolchain that isn't installed.
+### In-game checks with real clients (26.2 dev server, Polymer AutoHost pack required)
+- **Stock vanilla 26.2 joins** (Prism `SlashRails-Vanilla-26.2`): gets the pack, no registry or
+  payload errors in its log. `/give slashrails:track_smoother` shows the mod's own model (not a
+  stick). Right-clicking a rail with it reverts the 80-rail loop, and right-clicking again
+  re-smooths it. The action bar reads "Reverted 80 rails to vanilla" / "Smoothed a loop of 80 rails":
+  translations come from the pack.
+- **What vanilla players see:** the original zigzag rails, as intended. Smoothing shows only in
+  how carts move. Riding (third person, every 3 ticks and every tick): the rider follows the
+  curve; the cart body snaps to each rail block's line and flips between straight and 45� as it
+  crosses rails, as �2 predicted. The owner watched this live; see D1.
+- **Modded 26.2 client** (Fabric 0.19.5, Fabric API 0.159, spike jar) on the same server: Polymer
+  handshake ("Full sync"), smoothed loop drawn as curves, cart body and rider both follow the
+  curve. Same as today.
+- **Packet cost of every-tick updates** (`/slashrails-netstat`, one cart on the loop, one watching
+  player, 10�12 s windows; counts include every tracked entity): entity-move packets
+  (`move_entity_pos` + `_pos_rot` + `entity_position_sync`) went from about 30/s to about 40/s.
+  That is ~10 extra small packets per second per cart per watcher while on a curve, ~150 B/s.
+- **Bedrock:** not verified with a client. Geyser/Floodgate (the builds on the TBS reset-26.2
+  branch) load and answer pings with SlashRails + Polymer present. There is no Bedrock client on
+  this PC. The headless client (bedrock-protocol with JS RakNet) times out connecting, and the
+  native RakNet backend needs a C++ toolchain that isn't installed.
+
+**Spike verdict: PASS** on joining, the tool, riding and the modded client. Two things are still
+open: how the snapped cart model looks (D1) and Bedrock (a real client).
 
 ## 4. Pass / kill criteria
 
@@ -193,8 +204,8 @@ Goal: vanilla players see curved track (and optionally a cart model that follows
   for vanilla riders — not possible per player, the cart is shared), or fund the §6 cart-model
   part only.
 - **D3 — Cart update policy:** vanilla rate (every 3 ticks, rider turns in ~3× steps) or every
-  tick on smoothed runs (matches the ideal). Cost to be measured with `/slashrails-netstat`
-  (one small position packet per cart per tick per watching player while on a curve).
+  tick on smoothed runs (matches the ideal). Measured: ~10 extra small packets/s per cart per
+  watching player while on a curve (�3).
 - **D4 — Which bands get server-only mode:** 26.2 Fabric only (TBS), or every Fabric band.
 - **D5 — Packaging:** Polymer nested in every Fabric jar (bigger jar, Polymer loads on modded
   clients too) vs a separate `-server` artifact vs Polymer as an optional dependency the server
