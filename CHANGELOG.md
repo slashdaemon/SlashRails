@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.0 — unreleased
+
+Server-only mode on Minecraft 26.2 Fabric. Every other band is unchanged.
+
+- The 26.2 Fabric jar nests Polymer (core, resource pack, AutoHost) and lets clients without
+  SlashRails join (`allowVanillaClients`, default true). They get the Track Smoother as a
+  Polymer-backed stick with the mod's model from the server pack, no SlashRails payloads, vanilla
+  rail rendering, and the curve ride from the server's cart positions.
+- `cartSyncTicks` (default 1): position updates for carts on smoothed runs every tick, so vanilla
+  riders glide instead of stepping every 3 ticks.
+- All SlashRails text carries its English string as a fallback, and the item keeps the plain stick
+  model when the server pack isn't loaded, so a server without AutoHost degrades to readable text.
+- The server logs which path each player takes on join.
+- `prodtest.py` checks server-only jars (log line, AutoHost pack contents) and takes `--jar`.
+- Known: the arm doesn't swing when a vanilla player uses the tool.
+
 ## 0.2.0 — 2026-09-19
 
 Every Minecraft version from 1.20.1 to 26.3.

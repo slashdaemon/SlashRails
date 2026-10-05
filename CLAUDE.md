@@ -196,7 +196,7 @@ The Forge jar is tagged Forge + NeoForge.
 ## Scope
 
 Flat runs only (runs stop at slopes), opt-in tool, mod required on both sides — except
-**server-only builds** (branch `server-only`, 26.2 Fabric only; plan and decisions:
+**server-only builds** (26.2 Fabric only, since 0.3.0; plan and decisions:
 `docs/PLAN-server-only.md`). A band with `polymer: true` in `ext.rails` gets the `vanilla-polymer`
 loader variant (others get `vanilla-required`) and nests Polymer core/resource-pack/AutoHost:
 clients without the mod may join (`allowVanillaClients`), see the Track Smoother as a stick with

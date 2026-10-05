@@ -55,11 +55,20 @@ The built-in self-test rides a cart over each track shape, first on vanilla rail
 
 ## Installation
 
-SlashRails is needed on **both the server and every client**.
+SlashRails is needed on **both the server and every client**, with one exception: on **Minecraft 26.2 with Fabric**, the server can run it alone (see below).
 
 1. Drop the JAR matching your Minecraft version and loader into `mods/`: `-fabric`, `-neoforge` or `-forge`.
 2. On Fabric, add Fabric API. NeoForge and Forge need nothing extra.
 3. Start the game or server.
+
+### Server-only on 26.2 Fabric
+
+The 26.2 Fabric file also works on a server whose players don't have SlashRails:
+
+- Players without the mod can join. They see the Track Smoother as a stick with its own icon (from the server resource pack), can use it, and ride the curves.
+- They see the original zigzag rails, and the cart model still steps from rail to rail while it travels along the curve.
+- Players who do have the mod see the curved track as usual.
+- For the icon and text, the server needs Polymer's resource-pack hosting turned on (`config/polymer/auto-host.json`). Without it, players without the mod see a plain stick with English text.
 
 ## Compatibility
 
@@ -79,6 +88,8 @@ SlashRails is needed on **both the server and every client**.
 | `opOnlyTool` | server | false | Only operators can use the Track Smoother |
 | `toolPreview` | client | true | Show the green preview line while holding the tool |
 | `debugOverlay` | client | false | Draw every smoothed run's centre line |
+| `allowVanillaClients` | server | true | 26.2 Fabric only: let players without SlashRails join |
+| `cartSyncTicks` | server | 1 | 26.2 Fabric only: how often carts on curves send their position to players without the mod, in ticks (3 = vanilla) |
 
 ## Operator commands
 
