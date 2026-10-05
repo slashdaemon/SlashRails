@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 — unreleased
+## 0.3.0 — 2026-10-05
 
 Server-only mode on Minecraft 26.2 Fabric. Every other band is unchanged.
 
