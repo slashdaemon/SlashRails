@@ -50,7 +50,7 @@ ext.railsRenameSets = [
         // MC 26.2: entity-type constants move to EntityTypes; the main render target and the open
         // screen move to the game renderer and the GUI.
         "mc262"    : [
-                (/\bEntityType\.(HOPPER_MINECART|MINECART)\b/)   : 'net.minecraft.world.entity.EntityTypes.$1',
+                (/\bEntityType\.(HOPPER_MINECART|FURNACE_MINECART|MINECART)\b/)   : 'net.minecraft.world.entity.EntityTypes.$1',
                 (/\.getMainRenderTarget\(\)/)                     : '.gameRenderer.mainRenderTarget()',
                 (/\bmc\.screen\b/)                                : 'mc.gui.screen()',
                 (/\bmc\.setScreen\(/)                             : 'mc.gui.setScreen(',

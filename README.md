@@ -60,6 +60,9 @@ makes in a single tick.
 - Tested with ridden minecarts and hopper carts. Furnace minecarts haven't been tested on curves yet.
 - With Minecraft's experimental minecart physics turned on (1.21.2+ "Minecart Improvements"), carts
   ride the vanilla line; the smoothed curve is still drawn.
+- Modded carts that run their own rail physics (locomotives such as Choo Choo's) ride the vanilla
+  line on a smoothed run; the smoothed curve is still drawn. Modded carts that only add looks or
+  storage ride the curve.
 - On NeoForge 26.1 and later, NeoForge no longer lets rails change a passing cart's behaviour, so
   modded rails in a smoothed run act like plain vanilla ones.
 

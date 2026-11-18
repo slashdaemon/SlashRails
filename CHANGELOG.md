@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.1 — unreleased
+
+Fixes from the CityWorld author's report (CityWorld smooths its subway bends through SlashRails).
+
+- Modded carts with their own rail physics no longer stall on smoothed track. Choo Choo's
+  locomotive applies its pull inside its own rail movement, which a smoothed run skipped; such carts
+  (an overridden `moveAlongTrack` or NeoForge/Forge `moveMinecartOnRail`, or from 1.21.2 a
+  non-vanilla minecart behaviour) now ride the vanilla line there, and are drawn there too.
+- Smoothing never loads or generates a chunk. The clearance check read one block past a run that
+  ended at the edge of the loaded area, which loaded the next chunk on the server thread (pauses of
+  10–15 s in a new world). A neighbour in an unloaded chunk now counts as blocked, so the curve keeps
+  to the vanilla line there.
+- Smoothed modded rails are drawn with their straight texture. The texture came from the rail
+  model's particle sprite, which a modded corner model (Railcraft's) takes from the curved texture.
+  It now comes from the rail's straight (north-south) shape, for vanilla rails too.
+- Self-test: furnace carts over an arc and a loop; smoothing at the edge of the loaded area.
+
 ## 0.3.0 — 2026-10-05
 
 Server-only mode on Minecraft 26.2 Fabric. Every other band is unchanged.
