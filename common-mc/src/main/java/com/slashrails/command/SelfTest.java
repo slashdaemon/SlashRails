@@ -3,6 +3,7 @@ package com.slashrails.command;
 import com.slashrails.SlashRails;
 import com.slashrails.core.Dir;
 import com.slashrails.core.RailNode;
+import com.slashrails.ride.CartKind;
 import com.slashrails.ride.CartRide;
 import com.slashrails.run.RunService;
 import net.minecraft.commands.CommandSourceStack;
@@ -27,13 +28,18 @@ import java.util.List;
 public final class SelfTest {
 
     /**
-     * @param hopper ride an empty hopper cart instead of a ridden minecart (lighter, 0.96 friction:
-     *               it coasts to a stop, so it only has to stay on the curve, not finish)
+     * @param cart the cart that rides: a ridden minecart; an empty hopper cart (lighter, 0.96
+     *             friction: it coasts to a stop, so it only has to stay on the curve, not finish); or
+     *             a fuelled furnace cart (no rider; its push has to follow the curve)
      */
-    private record Case(String name, List<Dir> steps, boolean closed, double turnLimit, boolean trench, boolean hopper,
+    private record Case(String name, List<Dir> steps, boolean closed, double turnLimit, boolean trench, CartKind cart,
                         boolean ramp, boolean reverse) {
         Case(String name, List<Dir> steps, boolean closed, double turnLimit) {
-            this(name, steps, closed, turnLimit, false, false, false, false);
+            this(name, steps, closed, turnLimit, false, CartKind.RIDDEN, false, false);
+        }
+
+        boolean hopper() {
+            return cart == CartKind.HOPPER;
         }
     }
 
@@ -85,10 +91,13 @@ public final class SelfTest {
         cases.add(new Case("90-degree corner", TestTracks.corner(), false, Double.NaN));
         // In the walled middle the cart must keep to the vanilla line: it may turn sharply there but
         // must not scrape the walls, stall or derail.
-        cases.add(new Case("staircase 1:3 in a trench", TestTracks.staircase(3, 8), false, Double.NaN, true, false, false, false));
-        cases.add(new Case("hopper cart, staircase 1:2", TestTracks.staircase(2, 6), false, 5, false, true, false, false));
-        cases.add(new Case("entering from vanilla track up a ramp", TestTracks.staircase(3, 6), false, 5, false, false, true, false));
-        cases.add(new Case("staircase 1:3 ridden backwards", TestTracks.staircase(3, 6), false, 5, false, false, false, true));
+        cases.add(new Case("staircase 1:3 in a trench", TestTracks.staircase(3, 8), false, Double.NaN, true, CartKind.RIDDEN, false, false));
+        cases.add(new Case("hopper cart, staircase 1:2", TestTracks.staircase(2, 6), false, 5, false, CartKind.HOPPER, false, false));
+        // A furnace cart turns its push to follow its motion; through a bend the push must follow the curve.
+        cases.add(new Case("furnace cart, arc r=16", TestTracks.arc(16), false, 6, false, CartKind.FURNACE, false, false));
+        cases.add(new Case("furnace cart, loop r=10", TestTracks.loop(10), true, 8, false, CartKind.FURNACE, false, false));
+        cases.add(new Case("entering from vanilla track up a ramp", TestTracks.staircase(3, 6), false, 5, false, CartKind.RIDDEN, true, false));
+        cases.add(new Case("staircase 1:3 ridden backwards", TestTracks.staircase(3, 6), false, 5, false, CartKind.RIDDEN, false, true));
     }
 
     static boolean start(CommandSourceStack source) {
@@ -102,6 +111,10 @@ public final class SelfTest {
         if (running == null) return;
         if (running.breakCheckTicks > 0) {
             running.breakCheckStep();
+            return;
+        }
+        if (running.edgeCheckTicks > 0) {
+            running.edgeCheckStep();
             return;
         }
         running.step();
@@ -133,7 +146,66 @@ public final class SelfTest {
         say(line);
         TrackBuilder.clear(level, fixture.minX() - 3, fixture.minZ() - 3, fixture.maxX() + 3, fixture.maxZ() + 3, fixture.y());
         forceChunks(false);
-        int total = cases.size() + 1;
+        startEdgeCheck();
+    }
+
+    // ---- smoothing at the edge of the loaded area never loads a chunk ------------------------
+
+    private static final int EDGE_WAIT = 600;
+    private int edgeCheckTicks;
+    private int edgeWaited;
+    private int edgeChunkX, edgeChunkZ;
+    private long[] edgeForced;
+
+    /**
+     * A run that ends on the last loaded block column: the chunk beyond it must stay unloaded while
+     * the run is smoothed (Clearance reads one block around every rail). One forced chunk keeps a 5x5
+     * area of chunks fully loaded; the track ends on the east edge of that area.
+     */
+    private void startEdgeCheck() {
+        int fcx = (origin.getX() >> 4) + 64, fcz = origin.getZ() >> 4;
+        level.setChunkForced(fcx, fcz, true);
+        edgeForced = new long[]{fcx, fcz};
+        edgeChunkX = fcx + 3;
+        edgeChunkZ = fcz;
+        int edgeX = ((fcx + 2) << 4) + 15;
+        List<Dir> steps = TestTracks.staircase(2, 2);
+        int east = 0;
+        for (Dir d : steps) if (d == Dir.EAST) east++;
+        // openNodes: the last rail sits east of the origin by the number of east steps.
+        BlockPos at = new BlockPos(edgeX - east, origin.getY(), (fcz << 4) + 12);
+        fixture = TrackBuilder.build(level, at, steps, false);
+        edgeWaited = 0;
+        edgeCheckTicks = 1; // building touched the next chunk; wait for it to drop out of the loaded set
+    }
+
+    private void edgeCheckStep() {
+        if (level.hasChunk(edgeChunkX, edgeChunkZ) && ++edgeWaited < EDGE_WAIT) return;
+        edgeCheckTicks = 0;
+        String line;
+        boolean ok = false;
+        if (level.hasChunk(edgeChunkX, edgeChunkZ)) {
+            line = "FAIL smoothing at the edge of the loaded area: INCONCLUSIVE, the next chunk never unloaded";
+        } else {
+            RailNode first = fixture.nodes().get(0);
+            BlockPos firstPos = new BlockPos(first.x(), first.y(), first.z());
+            RunService.smooth(level, firstPos);
+            com.slashrails.run.SmoothRun run = com.slashrails.run.SmoothRunRegistry.get(level).runAt(firstPos);
+            boolean stillUnloaded = !level.hasChunk(edgeChunkX, edgeChunkZ);
+            boolean edgeTight = run != null && run.tight(run.size() - 1);
+            ok = run != null && stillUnloaded && edgeTight;
+            line = String.format("%s smoothing at the edge of the loaded area: %s, next chunk %s, edge rail %s",
+                    ok ? "PASS" : "FAIL", run == null ? "NOT SMOOTHED" : "smoothed " + run.size() + " rails",
+                    stillUnloaded ? "stayed unloaded" : "WAS LOADED", edgeTight ? "tight" : "NOT TIGHT");
+            RunService.revert(level, firstPos);
+        }
+        if (ok) passed++;
+        results.add(line);
+        say(line);
+        // Clear only up to the edge: clearing beyond it would load the next chunk.
+        TrackBuilder.clear(level, fixture.minX() - 3, fixture.minZ() - 3, fixture.maxX(), fixture.maxZ() + 3, fixture.y());
+        level.setChunkForced((int) edgeForced[0], (int) edgeForced[1], false);
+        int total = cases.size() + 2;
         say((passed == total ? "SELFTEST PASSED " : "SELFTEST FAILED ") + passed + "/" + total);
         running = null;
     }
@@ -173,10 +245,10 @@ public final class SelfTest {
                 sz = on.z();
             }
         }
-        AbstractMinecart cart = com.slashrails.ride.Carts.create(level, sx, sy, sz, c.hopper());
+        AbstractMinecart cart = com.slashrails.ride.Carts.create(level, sx, sy, sz, c.cart());
         level.addFreshEntity(cart);
         ArmorStand rider = null;
-        if (!c.hopper()) {
+        if (c.cart() == CartKind.RIDDEN) {
             rider = new ArmorStand(level, cart.getX(), cart.getY(), cart.getZ());
             level.addFreshEntity(rider);
             rider.startRiding(cart, true);
@@ -187,6 +259,7 @@ public final class SelfTest {
             d = Dir.of(prev.x() - last.x(), prev.z() - last.z());
         }
         cart.setDeltaMovement(d.dx * 0.4, 0, d.dz * 0.4);
+        if (c.cart() == CartKind.FURNACE) com.slashrails.ride.Carts.startFurnace(cart, d.dx, d.dz);
         ride.cart = cart;
         ride.rider = rider;
         ride.last = cart.position();

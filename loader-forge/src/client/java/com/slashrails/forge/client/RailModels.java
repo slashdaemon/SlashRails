@@ -7,7 +7,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.client.event.ModelEvent;
 
 import java.util.Map;
@@ -24,7 +23,7 @@ final class RailModels {
             if (!(e.getKey() instanceof ModelResourceLocation id) || "inventory".equals(id.getVariant())) continue;
             Block block = BuiltInRegistries.BLOCK.get(Ids.of(id.getNamespace(), id.getPath()));
             if (block instanceof BaseRailBlock) {
-                e.setValue(new SmoothRailModel(e.getValue(), block == Blocks.RAIL));
+                e.setValue(new SmoothRailModel(e.getValue()));
             }
         }
     }

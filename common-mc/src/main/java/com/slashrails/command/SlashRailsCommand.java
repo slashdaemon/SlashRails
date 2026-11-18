@@ -76,7 +76,7 @@ public final class SlashRailsCommand {
         TrackBuilder.Fixture f = TrackBuilder.build(level, origin, steps, closed);
 
         RailNode first = f.nodes().get(closed ? 0 : 1);
-        level.addFreshEntity(com.slashrails.ride.Carts.create(level, first.x() + 0.5, first.y() + 0.0625, first.z() + 0.5, false));
+        level.addFreshEntity(com.slashrails.ride.Carts.create(level, first.x() + 0.5, first.y() + 0.0625, first.z() + 0.5, com.slashrails.ride.CartKind.RIDDEN));
 
         int rails = f.nodes().size();
         if (smooth) {

@@ -2,6 +2,7 @@ package com.slashrails.neoforge.client;
 
 import com.slashrails.client.ClientRuns;
 import com.slashrails.client.render.RailSprites;
+import com.slashrails.client.render.StraightRail;
 import com.slashrails.client.render.TrackMesh;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -30,11 +31,8 @@ final class SmoothRailModel extends BakedModelWrapper<BakedModel> {
 
     private static final ModelProperty<ClientRuns.Slot> SLOT = new ModelProperty<>();
 
-    private final boolean plainRail;
-
-    SmoothRailModel(BakedModel original, boolean plainRail) {
+    SmoothRailModel(BakedModel original) {
         super(original);
-        this.plainRail = plainRail;
     }
 
     @Override
@@ -50,10 +48,8 @@ final class SmoothRailModel extends BakedModelWrapper<BakedModel> {
         ClientRuns.Slot slot = data.get(SLOT);
         if (slot == null) return super.getQuads(state, side, rand, data, renderType);
         if (side != null) return List.of();
-        // The plain rail's corner states use the corner texture; a curve always wants the straight one.
-        TextureAtlasSprite sprite = plainRail
-                ? RailSprites.plainRail()
-                : originalModel.getParticleIcon();
+        // Corner models use the curved texture; a curve is drawn with the straight shape's.
+        TextureAtlasSprite sprite = StraightRail.sprite(state, originalModel.getParticleIcon());
         List<TrackMesh.Quad> mesh = TrackMesh.forRail(slot.run(), slot.index());
         List<BakedQuad> out = new ArrayList<>(mesh.size() * 2);
         QuadBakingVertexConsumer baker = new QuadBakingVertexConsumer();

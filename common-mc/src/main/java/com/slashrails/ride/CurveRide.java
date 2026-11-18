@@ -40,6 +40,11 @@ public final class CurveRide {
     public static boolean stepOnRail(AbstractMinecart cart, BlockPos railPos) {
         if (!(cart.level() instanceof ServerLevel level)) return false;
         CartRide ride = (CartRide) cart;
+        if (Carts.ownsRailMovement(cart)) {
+            // A modded cart with its own rail physics (a locomotive's engine, say) rides the vanilla line.
+            if (ride.slashrails$runId() != 0) ride.slashrails$clear();
+            return false;
+        }
         SmoothRunRegistry registry = SmoothRunRegistry.get(level);
         if (registry.isEmpty()) {
             if (ride.slashrails$runId() != 0) ride.slashrails$clear();

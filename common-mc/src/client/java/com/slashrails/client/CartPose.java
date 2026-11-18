@@ -3,6 +3,7 @@ package com.slashrails.client;
 import com.slashrails.core.Pt;
 import com.slashrails.core.SmoothCurve;
 import com.slashrails.ride.CartRide;
+import com.slashrails.ride.Carts;
 import com.slashrails.run.SmoothRun;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -44,6 +45,8 @@ public final class CartPose {
     @Nullable
     private static Double arcLength(AbstractMinecart cart, double x, double y, double z) {
         if (!cart.level().isClientSide() || ClientRuns.isEmpty()) return null;
+        // The server leaves carts with their own rail physics on the vanilla line; draw them there too.
+        if (Carts.ownsRailMovement(cart)) return null;
         CartRide ride = (CartRide) cart;
         int bx = Mth.floor(x), by = Mth.floor(y), bz = Mth.floor(z);
         ClientRuns.Slot slot = ClientRuns.at(BlockPos.asLong(bx, by, bz));

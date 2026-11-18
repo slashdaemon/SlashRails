@@ -1,7 +1,7 @@
 package com.slashrails.fabric.client;
 
 import com.slashrails.client.ClientRuns;
-import com.slashrails.client.render.RailSprites;
+import com.slashrails.client.render.StraightRail;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
@@ -22,11 +22,8 @@ import java.util.function.Supplier;
 final class SmoothRailModel extends DelegateBakedModel {
 
 
-    private final boolean plainRail;
-
-    SmoothRailModel(BakedModel wrapped, boolean plainRail) {
+    SmoothRailModel(BakedModel wrapped) {
         super(wrapped);
-        this.plainRail = plainRail;
     }
 
     @Override
@@ -42,9 +39,8 @@ final class SmoothRailModel extends DelegateBakedModel {
             parent.emitBlockQuads(emitter, blockView, state, pos, randomSupplier, cullTest);
             return;
         }
-        TextureAtlasSprite sprite = plainRail
-                ? RailSprites.plainRail()
-                : parent.getParticleIcon();
+        // Corner models use the curved texture; a curve is drawn with the straight shape's.
+        TextureAtlasSprite sprite = StraightRail.sprite(state, parent.getParticleIcon());
         FabricQuads.emit(emitter, slot, sprite);
     }
 }

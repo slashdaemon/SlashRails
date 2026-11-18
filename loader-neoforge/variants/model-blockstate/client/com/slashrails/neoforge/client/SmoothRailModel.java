@@ -2,6 +2,7 @@ package com.slashrails.neoforge.client;
 
 import com.slashrails.client.ClientRuns;
 import com.slashrails.client.render.RailSprites;
+import com.slashrails.client.render.StraightRail;
 import com.slashrails.client.render.TrackMesh;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
@@ -26,11 +27,8 @@ import java.util.List;
  */
 final class SmoothRailModel extends DelegateBlockStateModel {
 
-    private final boolean plainRail;
-
-    SmoothRailModel(BlockStateModel original, boolean plainRail) {
+    SmoothRailModel(BlockStateModel original) {
         super(original);
-        this.plainRail = plainRail;
     }
 
     @Override
@@ -40,7 +38,8 @@ final class SmoothRailModel extends DelegateBlockStateModel {
             super.collectParts(level, pos, state, random, parts);
             return;
         }
-        TextureAtlasSprite sprite = plainRail ? RailSprites.plainRail() : delegate.particleIcon();
+        // Corner models use the curved texture; a curve is drawn with the straight shape's.
+        TextureAtlasSprite sprite = StraightRail.sprite(state, delegate.particleIcon());
         List<TrackMesh.Quad> mesh = TrackMesh.forRail(slot.run(), slot.index());
         List<BakedQuad> quads = new ArrayList<>(mesh.size() * 2);
         for (TrackMesh.Quad q : mesh) {
