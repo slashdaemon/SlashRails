@@ -10,7 +10,9 @@ Fixes from the CityWorld author's report (CityWorld smooths its subway bends thr
   non-vanilla minecart behaviour) now run their own physics on the rails under a smoothed run, so
   their engines, couplings and derail checks see real rails. Clients draw them on the curve, at the
   curve's angle: the client-side cart is moved onto the curve each tick and its rail pose comes from
-  the curve.
+  the curve. Long carts (client config `cartLengths`, with defaults for Choo Choo's) sit like
+  two-bogie vehicles, ends on the track and middle slightly inside the bend, not centred and tangent
+  with both ends overhanging.
 - Smoothing never loads or generates a chunk. The clearance check read one block past a run that
   ended at the edge of the loaded area, which loaded the next chunk on the server thread (pauses of
   10–15 s in a new world). A neighbour in an unloaded chunk now counts as blocked, so the curve keeps

@@ -7,6 +7,9 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -27,6 +30,15 @@ public final class Config {
     public static boolean allowVanillaClients = true;
     /** Server, server-only builds: send smoothed-run carts' positions every N ticks (1-3; vanilla: 3). */
     public static int cartSyncTicks = 1;
+    /**
+     * Client: visual body length (blocks) of modded carts longer than a vanilla minecart, by entity
+     * id. A listed cart sits on a smoothed curve like a two-bogie vehicle: its ends on the track, its
+     * middle slightly inside the bend, instead of centred and tangent with both ends overhanging.
+     * Unlisted carts (vanilla ones too) keep the tangent pose.
+     */
+    public static String cartLengths = "choochoo:locomotive=2.35;choochoo:passenger_cart=2.5;"
+            + "choochoo:storage_cart=2.7;choochoo:flatbed_cart=3.6;choochoo:single_cart=1.9";
+    private static Map<String, Double> cartLengthMap = parseLengths(cartLengths);
 
     private Config() {
     }
@@ -45,6 +57,8 @@ public final class Config {
         opOnlyTool = boolOf(p, "opOnlyTool", opOnlyTool);
         debugOverlay = boolOf(p, "debugOverlay", debugOverlay);
         toolPreview = boolOf(p, "toolPreview", toolPreview);
+        cartLengths = p.getProperty("cartLengths", cartLengths).trim();
+        cartLengthMap = parseLengths(cartLengths);
         boolean serverOnly = Platform.get().supportsVanillaClients();
         if (serverOnly) {
             allowVanillaClients = boolOf(p, "allowVanillaClients", allowVanillaClients);
@@ -55,6 +69,7 @@ public final class Config {
         p.setProperty("opOnlyTool", Boolean.toString(opOnlyTool));
         p.setProperty("debugOverlay", Boolean.toString(debugOverlay));
         p.setProperty("toolPreview", Boolean.toString(toolPreview));
+        p.setProperty("cartLengths", cartLengths);
         if (serverOnly) {
             p.setProperty("allowVanillaClients", Boolean.toString(allowVanillaClients));
             p.setProperty("cartSyncTicks", Integer.toString(cartSyncTicks));
@@ -62,11 +77,32 @@ public final class Config {
         try {
             Files.createDirectories(file.getParent());
             try (Writer w = Files.newBufferedWriter(file)) {
-                p.store(w, "SlashRails. maxRunLength/opOnlyTool/allowVanillaClients/cartSyncTicks: server. debugOverlay/toolPreview: client.");
+                p.store(w, "SlashRails. maxRunLength/opOnlyTool/allowVanillaClients/cartSyncTicks: server. debugOverlay/toolPreview/cartLengths: client.");
             }
         } catch (IOException e) {
             SlashRails.LOG.warn("Could not write {}", file, e);
         }
+    }
+
+    /** The configured body length of a cart type ({@code namespace:path}), or 0 if it isn't listed. */
+    public static double cartLength(String entityId) {
+        Double l = cartLengthMap.get(entityId);
+        return l == null ? 0 : l;
+    }
+
+    private static Map<String, Double> parseLengths(String spec) {
+        Map<String, Double> out = new HashMap<>();
+        for (String entry : spec.split(";")) {
+            int eq = entry.indexOf('=');
+            if (eq <= 0) continue;
+            try {
+                double l = Double.parseDouble(entry.substring(eq + 1).trim());
+                if (l > 0 && l <= 16) out.put(entry.substring(0, eq).trim().toLowerCase(Locale.ROOT), l);
+            } catch (NumberFormatException e) {
+                SlashRails.LOG.warn("cartLengths: ignoring '{}'", entry.trim());
+            }
+        }
+        return out;
     }
 
     private static int intOf(Properties p, String key, int def) {

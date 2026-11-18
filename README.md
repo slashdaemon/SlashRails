@@ -76,6 +76,7 @@ makes in a single tick.
 | `opOnlyTool` | server | false | Only operators may use the Track Smoother |
 | `toolPreview` | client | true | Show the green preview line while holding the tool |
 | `debugOverlay` | client | false | Draw every smoothed run's centre line |
+| `cartLengths` | client | Choo Choo carts | Body length (blocks) of long modded carts, as `id=length;…`: listed carts sit on curves like two-bogie vehicles |
 
 Operators also get `/slashrails list`, `/slashrails testtrack …` and `/slashrails selftest`.
 
