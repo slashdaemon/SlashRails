@@ -7,7 +7,10 @@ Fixes from the CityWorld author's report (CityWorld smooths its subway bends thr
 - Modded carts with their own rail physics no longer stall on smoothed track. Choo Choo's
   locomotive applies its pull inside its own rail movement, which a smoothed run skipped; such carts
   (an overridden `moveAlongTrack` or NeoForge/Forge `moveMinecartOnRail`, or from 1.21.2 a
-  non-vanilla minecart behaviour) now ride the vanilla line there, and are drawn there too.
+  non-vanilla minecart behaviour) now run their own physics on the rails under a smoothed run, so
+  their engines, couplings and derail checks see real rails. Clients draw them on the curve, at the
+  curve's angle: the client-side cart is moved onto the curve each tick and its rail pose comes from
+  the curve.
 - Smoothing never loads or generates a chunk. The clearance check read one block past a run that
   ended at the edge of the loaded area, which loaded the next chunk on the server thread (pauses of
   10–15 s in a new world). A neighbour in an unloaded chunk now counts as blocked, so the curve keeps

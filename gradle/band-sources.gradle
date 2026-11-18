@@ -65,7 +65,7 @@ project.ext.railsResources = resources.findAll { it.isDirectory() }
 // Mixin lists: the shared ones plus whatever each variant contributes.
 def readList = { File f -> f.isFile() ? f.readLines().collect { it.trim() }.findAll { it && !it.startsWith("#") } : [] }
 def mixins = ["AbstractMinecartMixin", "MinecartFurnaceAccessor"]
-def clientMixins = []
+def clientMixins = ["CartCurvePresentMixin"]
 ([new File(root, "loader-${loaderName}")] + compat + loaderVariants).each { dir ->
     mixins += readList(new File(dir, "mixins.txt"))
     clientMixins += readList(new File(dir, "client-mixins.txt"))

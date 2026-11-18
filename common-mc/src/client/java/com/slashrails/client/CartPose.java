@@ -41,12 +41,25 @@ public final class CartPose {
         return new Vec3(p.x(), p.y(), p.z());
     }
 
+    /**
+     * Client tick: a cart with its own rail physics (a modded locomotive) moves on the vanilla line on
+     * the server, which keeps its engine, couplings and derail checks on real rails. Show it on the
+     * curve instead: put the client-side entity at the curve point level with it, so its model, hitbox
+     * and passengers sit on the drawn track. Progress along the track still follows the server.
+     */
+    public static void presentOnCurve(AbstractMinecart cart) {
+        if (!Carts.ownsRailMovement(cart)) return; // the server already moves vanilla carts along the curve
+        Vec3 at = cart.position();
+        Double s = arcLength(cart, at.x, at.y, at.z);
+        if (s == null) return;
+        Pt p = ClientRuns.byId(((CartRide) cart).slashrails$runId()).curve().pointAt(s);
+        cart.setPos(p.x(), at.y, p.z());
+    }
+
     /** Arc length of (x, y, z) on the smoothed run under the cart, or null to fall back to vanilla. */
     @Nullable
     private static Double arcLength(AbstractMinecart cart, double x, double y, double z) {
         if (!cart.level().isClientSide() || ClientRuns.isEmpty()) return null;
-        // The server leaves carts with their own rail physics on the vanilla line; draw them there too.
-        if (Carts.ownsRailMovement(cart)) return null;
         CartRide ride = (CartRide) cart;
         int bx = Mth.floor(x), by = Mth.floor(y), bz = Mth.floor(z);
         ClientRuns.Slot slot = ClientRuns.at(BlockPos.asLong(bx, by, bz));
