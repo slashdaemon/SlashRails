@@ -57,7 +57,7 @@ makes in a single tick.
 - Needed on **both** the server and every client.
 - Flat track only for now: a run stops where the track goes up or down a slope.
 - A single sharp 90° corner can only be rounded a little — it stays a tight turn.
-- Tested with ridden minecarts and hopper carts. Furnace minecarts haven't been tested on curves yet.
+- Tested with ridden minecarts, hopper carts and furnace minecarts.
 - With Minecraft's experimental minecart physics turned on (1.21.2+ "Minecart Improvements"), carts
   ride the vanilla line; the smoothed curve is still drawn.
 - Modded carts that run their own rail physics (locomotives such as Choo Choo's) ride the vanilla

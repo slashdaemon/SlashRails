@@ -15,6 +15,9 @@ Fixes from the CityWorld author's report (CityWorld smooths its subway bends thr
 - Smoothed modded rails are drawn with their straight texture. The texture came from the rail
   model's particle sprite, which a modded corner model (Railcraft's) takes from the curved texture.
   It now comes from the rail's straight (north-south) shape, for vanilla rails too.
+- Furnace minecarts keep going round smoothed curves on Minecraft 1.21.1 and earlier. Their push
+  turns to follow their motion in vanilla code that a smoothed run skipped, so they slowed to a stop
+  in a bend (or reversed on a loop). 1.21.2 and later were not affected.
 - Self-test: furnace carts over an arc and a loop; smoothing at the edge of the loaded area.
 
 ## 0.3.0 — 2026-10-05
