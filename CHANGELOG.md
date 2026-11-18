@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.1 — unreleased
+## 0.3.1 — 2026-11-18
 
 Fixes from the CityWorld author's report (CityWorld smooths its subway bends through SlashRails).
 

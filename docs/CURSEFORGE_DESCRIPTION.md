@@ -104,7 +104,8 @@ The 26.2 Fabric file also works on a server whose players don't have SlashRails:
 
 - **Flat track only for now.** A run stops where the track goes up or down a slope.
 - **A single sharp 90° corner** can only be rounded a little — it stays a tight turn.
-- **Furnace minecarts** haven't been tested on curves yet. Ridden minecarts and hopper minecarts have.
+- **Self-driving modded trains** (Choo Choo's locomotives, for example) are drawn on the curve, facing along it, while their own physics run on the rails underneath. Long carts sit like two-bogie carriages; set their length in `cartLengths` in `config/slashrails.properties` if a mod's carts aren't listed.
+- **Players without SlashRails** on a 26.2 Fabric server-only setup see self-driving modded carts on the original rail line.
 
 ## Source & links
 

@@ -15,5 +15,6 @@ Fixes for problems found when SlashRails runs alongside other rail mods. Thanks 
 **Tested**
 - Automated ride test with ridden, hopper and furnace minecarts, plus smoothing at the edge of the loaded area. It passed on Minecraft 1.20.1 Forge, 1.21.1 Fabric and NeoForge, 1.21.5 Fabric, 1.21.11 NeoForge, 26.2 Fabric and 26.3 NeoForge, on Windows. It also passed on 1.20.1 Forge, 1.21.1 Fabric and NeoForge, 1.21.5 Fabric and 26.2 NeoForge on macOS.
 - The curved track was checked in-game on those five versions on macOS.
-- A Choo Choo 1.2.0 locomotive was run on a smoothed bend on NeoForge 1.21.1, on a server and in-game. With 0.3.0 it stood still. With 0.3.1 it goes round, just as it does on unsmoothed track.
+- A Choo Choo 1.2.0 locomotive was run on smoothed bends on NeoForge 1.21.1, on a server and in-game. With 0.3.0 it stood still. With 0.3.1 it goes round, just as it does on unsmoothed track, without stutter.
+- Its position on the curve was measured from top-down screenshots: within 2 degrees of the track and 0.08 blocks of its centre line on a gentle arc, a staircase and a radius-10 loop. On a radius-6 loop it stays within about 0.1 blocks, the closest a 2.35-block body can follow a curve that tight.
 - Every file was tested on a real server for its own Minecraft version and loader.
