@@ -160,6 +160,7 @@ public final class CurveRide {
 
         // Velocity along the new tangent, then vanilla's slowdown (virtual: furnace carts add push).
         cart.setDeltaMovement(t2.x() * sign * speed, 0, t2.z() * sign * speed);
+        Carts.alignFurnacePush(cart);
         Carts.applyNaturalSlowdown(cart);
         Vec3 slowed = cart.getDeltaMovement();
         double a2 = slowed.x * t2.x() + slowed.z * t2.z();

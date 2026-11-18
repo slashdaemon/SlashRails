@@ -107,6 +107,22 @@ public final class Carts {
         };
     }
 
+    /**
+     * Vanilla's furnace cart turns its push to follow its motion in its {@code moveAlongTrack}
+     * override, which a smoothed run skips: do the same here, on the velocity along the curve.
+     */
+    public static void alignFurnacePush(AbstractMinecart cart) {
+        if (!(cart instanceof MinecartFurnace furnace)) return;
+        net.minecraft.world.phys.Vec3 v = cart.getDeltaMovement();
+        double moving = v.horizontalDistanceSqr();
+        double push = furnace.xPush * furnace.xPush + furnace.zPush * furnace.zPush;
+        if (push > 1.0E-4 && moving > 0.001) {
+            double m = Math.sqrt(moving), p = Math.sqrt(push);
+            furnace.xPush = v.x / m * p;
+            furnace.zPush = v.z / m * p;
+        }
+    }
+
     /** Fuel a furnace cart and point its push along (dx, dz). */
     public static void startFurnace(AbstractMinecart cart, double dx, double dz) {
         MinecartFurnace furnace = (MinecartFurnace) cart;

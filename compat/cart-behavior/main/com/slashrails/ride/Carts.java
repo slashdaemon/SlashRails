@@ -53,6 +53,10 @@ public final class Carts {
         };
     }
 
+    /** From 1.21.2 the furnace cart turns its push in {@code applyNaturalSlowdown}, which the curve ride calls. */
+    public static void alignFurnacePush(AbstractMinecart cart) {
+    }
+
     /** Fuel a furnace cart and point its push along (dx, dz). */
     public static void startFurnace(AbstractMinecart cart, double dx, double dz) {
         MinecartFurnace furnace = (MinecartFurnace) cart;

@@ -154,7 +154,7 @@ public final class SelfTest {
     private static final int EDGE_WAIT = 600;
     private int edgeCheckTicks;
     private int edgeWaited;
-    private int edgeChunkX, edgeChunkZ;
+    private int edgeChunkX, edgeChunkZ, edgeX;
     private long[] edgeForced;
 
     /**
@@ -168,7 +168,7 @@ public final class SelfTest {
         edgeForced = new long[]{fcx, fcz};
         edgeChunkX = fcx + 3;
         edgeChunkZ = fcz;
-        int edgeX = ((fcx + 2) << 4) + 15;
+        edgeX = ((fcx + 2) << 4) + 15;
         List<Dir> steps = TestTracks.staircase(2, 2);
         int east = 0;
         for (Dir d : steps) if (d == Dir.EAST) east++;
@@ -192,7 +192,13 @@ public final class SelfTest {
             RunService.smooth(level, firstPos);
             com.slashrails.run.SmoothRun run = com.slashrails.run.SmoothRunRegistry.get(level).runAt(firstPos);
             boolean stillUnloaded = !level.hasChunk(edgeChunkX, edgeChunkZ);
-            boolean edgeTight = run != null && run.tight(run.size() - 1);
+            // The run may list its rails from either end: find the edge rail by position.
+            boolean edgeTight = false;
+            if (run != null) {
+                for (int i = 0; i < run.size(); i++) {
+                    if (run.rail(i).getX() == edgeX) edgeTight = run.tight(i);
+                }
+            }
             ok = run != null && stillUnloaded && edgeTight;
             line = String.format("%s smoothing at the edge of the loaded area: %s, next chunk %s, edge rail %s",
                     ok ? "PASS" : "FAIL", run == null ? "NOT SMOOTHED" : "smoothed " + run.size() + " rails",
